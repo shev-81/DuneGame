@@ -2,58 +2,24 @@ package com.dune.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
+
+import java.util.ArrayList;
 
 public class DuneGame extends ApplicationAdapter {
     private SpriteBatch batch;
-	Tank tank;
-
-    private static class Tank {
-        float x;
-        float y;
-        float angle;
-        float speed;
-        private Texture tankTexture;
-        Vector2 position;
-
-        public Tank(float x, float y) {
-            this.position = new Vector2(x,y);
-            this.tankTexture = new Texture("tank.png");
-            this.speed = 200.0f;
-        }
-
-        public void render(SpriteBatch batch) {
-            batch.draw(tankTexture,position.x-40,position.y-40, 40, 40, 80, 80, 1, 1, angle,0,0, 80, 80,false,false);
-        }
-
-        public void update(Float dt){
-            if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
-                angle += 180 * dt;
-            }
-            if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
-                angle -= 180 * dt;
-            }
-            if(Gdx.input.isKeyPressed(Input.Keys.UP)){
-                position.x += speed * MathUtils.cosDeg(angle) * dt;
-                position.y += speed * MathUtils.sinDeg(angle) * dt;
-            }
-
-        }
-
-        public void dispose() {
-            tankTexture.dispose();
-        }
-    }
+    Tank tank;
+    ArrayList<Obstacles> obstacles;
 
     @Override
     public void create() {
         batch = new SpriteBatch();
-        tank = new Tank(200, 200);
+        obstacles = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            obstacles.add(new Ball((float) Math.random() * 1160 + 80, (float) Math.random() * 560 + 80));
+        }
+        tank = new Tank(200, 200, obstacles);
     }
 
     @Override
@@ -62,15 +28,23 @@ public class DuneGame extends ApplicationAdapter {
         ScreenUtils.clear(0.1f, 0.2f, 0, 1);
         batch.begin();
         update(dt);
-		tank.render(batch);
+        tank.render(batch);
+        for (Obstacles o : obstacles)
+            o.render(batch);
         batch.end();
     }
-    public void update(Float dt){
+
+    public void update(Float dt) {
         tank.update(dt);
+        for (Obstacles o : obstacles)
+            o.update(dt);
     }
+
     @Override
     public void dispose() {
         batch.dispose();
+        for (Obstacles o : obstacles)
+            o.dispose();
         tank.dispose();
     }
 }
