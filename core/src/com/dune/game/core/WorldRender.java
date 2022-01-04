@@ -19,6 +19,7 @@ public class WorldRender {
         for (Obstacles o : gameController.getObstacles())
             o.render(batch);
         gameController.getTank().render(batch);
+        gameController.getBullet().render(batch);
         batch.end();
     }
 }

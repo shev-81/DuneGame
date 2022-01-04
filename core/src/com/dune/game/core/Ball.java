@@ -17,6 +17,7 @@ public class Ball implements Obstacles{
         this.ballTexture = atlas.findRegion("blackhole");
     }
 
+    // метод вызывается из WorldRender
     public void render(SpriteBatch batch) {
         batch.draw(ballTexture,position.x-40,position.y-40,40, 40, 80, 80, 1, 1, angle);
     }

@@ -9,7 +9,7 @@ public class DesktopLauncher {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.height = 720;
 		config.width = 1280;
-		//config.foregroundFPS = 60;
+		//config.foregroundFPS = 60;  частота обновления экрана
 		new LwjglApplication(new DuneGame(), config);
 	}
 }

@@ -10,6 +10,8 @@ public class BattleMap {
     public BattleMap (TextureAtlas atlas){
         this.grassTexture = atlas.findRegion("grass");
     }
+
+    // метод вызывается из WorldRender
     public void render(SpriteBatch batch){
         for (int i = 0; i < 16; i++) {
             for (int j = 0; j < 9; j++) {

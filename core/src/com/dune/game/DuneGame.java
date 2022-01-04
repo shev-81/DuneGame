@@ -17,8 +17,9 @@ public class DuneGame extends Game {
     }
 
     @Override
-    public void render() {
+    public void render() {                               // метод крутится 60 вызовов в секунду
         getScreen().render(Gdx.graphics.getDeltaTime());
+        //super.render();
     }
 
     @Override
