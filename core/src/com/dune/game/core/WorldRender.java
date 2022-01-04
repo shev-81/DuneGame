@@ -12,14 +12,13 @@ public class WorldRender {
         this.gameController = gameController;
     }
 
-    public void render (){
+    public void render() {
         ScreenUtils.clear(0.1f, 0.1f, 0.1f, 1);
         batch.begin();
         gameController.getBattleMap().render(batch);
         for (Obstacles o : gameController.getObstacles())
             o.render(batch);
         gameController.getTank().render(batch);
-        gameController.getBullet().render(batch);
         batch.end();
     }
 }

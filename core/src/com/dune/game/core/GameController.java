@@ -15,45 +15,49 @@ public class GameController {
     // инициализация игровой логики
     public GameController() {
         TextureAtlas atlas = new TextureAtlas(Gdx.files.internal("game.pack"));  //загрузка атласа
-        obstacles = new ArrayList<>();                  //создание списка врагов
+        createObstacles(atlas);                         //создание списка врагов
+        this.battleMap = new BattleMap(atlas);          // создание игровой карты
+        this.tank = new Tank(200, 200, atlas);     //создание танка
+    }
+
+    public void createObstacles(TextureAtlas atlas){
+        obstacles = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             obstacles.add(new Ball((float) Math.random() * 1160 + 80, (float) Math.random() * 560 + 80, atlas));
         }
-        this.battleMap = new BattleMap(atlas);          // создание игровой карты
-        this.tank = new Tank(200, 200, atlas, this);     //создание танка
-        this.bullet = new Bullet(tank, atlas);
     }
 
     public BattleMap getBattleMap() {
         return battleMap;
     }
+
     public Tank getTank() {
         return tank;
     }
+
     public ArrayList<Obstacles> getObstacles() {
         return obstacles;
-    }
-    public Bullet getBullet() {
-        return bullet;
     }
 
     // апдейт всех созданных объектов
     public void update(float dt) {
         tank.update(dt);
-        for (Obstacles o : obstacles)
-            o.update(dt);
-        if(bullet.isShoot()) bullet.update(dt);
-        collisions();
-
+        collisions(dt);
     }
 
     //разрешение коллизий столкновений объектов
-    public void collisions() {
+    public void collisions(float dt) {
         for (Obstacles o : obstacles) {
+            o.update(dt);
             if (tank.getPosition().dst(o.getPosition()) < 60) {              // метод dst() возвращает расстояние между векторами
                 o.getPosition().x = (float) Math.random() * 1160 + 80;
                 o.getPosition().y = (float) Math.random() * 560 + 80;
             }
+            if (tank.getBullet().getShootVector().dst(o.getPosition()) < 50) {
+                o.getPosition().x = (float) Math.random() * 1160 + 80;
+                o.getPosition().y = (float) Math.random() * 560 + 80;
+            }
         }
+
     }
 }

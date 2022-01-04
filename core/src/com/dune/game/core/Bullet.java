@@ -1,5 +1,4 @@
 package com.dune.game.core;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -7,77 +6,54 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
-public class Bullet implements Obstacles {
+public class Bullet implements Poolable{
 
     private float angle;
-    private Vector2 position;
+    private Vector2 shootVector;
     private TextureRegion bulletTexture;
     private float speed = 400.0f;
-    private Tank tank;
-    private boolean shoot = false;
+    private boolean active = false;
 
-    public Bullet(Tank tank, TextureAtlas atlas) {
-        this.tank = tank;
-        this.angle = tank.getAngle();
-        this.position = new Vector2(tank.getPosition().x, tank.getPosition().y);
-        this.bulletTexture = atlas.findRegion("bullet");
+    public Bullet(TextureAtlas atlas) {
+        this.bulletTexture = atlas.findRegion("bullet2");
+        this.shootVector = new Vector2(0,0);
     }
 
-    public void setShoot(boolean shoot) {
-        this.shoot = shoot;
-    }
-
-    public boolean isShoot() {
-        return shoot;
-    }
-
-    public void setSpeed(float speed) {
-        this.speed = speed;
-    }
-
-    @Override
     public void render(SpriteBatch batch) {
-        if(isShoot())
-            batch.draw(bulletTexture, position.x, position.y, 8, 8, 16, 16, 2, 2, 0);
+        if (isActive())
+            batch.draw(bulletTexture, shootVector.x, shootVector.y, 8, 8, 16, 16, 2, 2, 0);
     }
 
-    @Override
-    public void update(Float dt) {
-        if (isShoot()) {
-            position.add(speed * MathUtils.cosDeg(angle) * dt, speed * MathUtils.sinDeg(angle) * dt);
-            if ((int) position.y > Gdx.graphics.getHeight() - 16) {
-                speed = 0;
-                shoot = false;
-                position.x = tank.getPosition().x;
-                position.y = tank.getPosition().y;
-            }
-            if ((int) position.y < 16) {
-                speed = 0;
-                shoot = false;
-                position.x = tank.getPosition().x;
-                position.y = tank.getPosition().y;
-            }
-            if ((int) position.x > Gdx.graphics.getWidth() - 16) {
-                speed = 0;
-                shoot = false;
-                position.x = tank.getPosition().x;
-                position.y = tank.getPosition().y;
-                            }
-            if ((int) position.x < 16) {
-                speed = 0;
-                shoot = false;
-                position.x = tank.getPosition().x;
-                position.y = tank.getPosition().y;
-            }
+    public void update(float dt) {
+        if (isActive()) {
+            this.shootVector.add(speed * MathUtils.cosDeg(angle) * dt, speed * MathUtils.sinDeg(angle) * dt);
+            chekCollisionBorderScreen ();
         }
     }
+    public void setup(float angle, Vector2 tmpVector){
+        this.shootVector.set(tmpVector);
+        this.angle=angle;
 
-    @Override
-    public void dispose() {
     }
 
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public Vector2 getShootVector() {
+        return shootVector;
+    }
     @Override
-    public Vector2 getPosition() {
-        return position;
+    public boolean isActive() {
+        return active;
+    }
+
+    public void chekCollisionBorderScreen () {
+        if ((int) shootVector.y > Gdx.graphics.getHeight() || (int) shootVector.y < 0) {
+            active = false;
+        }
+        if ((int) shootVector.x > Gdx.graphics.getWidth() || (int) shootVector.x < 0) {
+            active = false;
+        }
     }
 }
