@@ -4,11 +4,12 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-public class BattleMap {
+public class BattleMap extends GameObject{
     private TextureRegion grassTexture;
 
-    public BattleMap (TextureAtlas atlas){
-        this.grassTexture = atlas.findRegion("grass");
+    public BattleMap (GameController gameController){
+        super(gameController);
+        this.grassTexture = Assets.getInstance().getAtlas().findRegion("grass");
     }
 
     // метод вызывается из WorldRender

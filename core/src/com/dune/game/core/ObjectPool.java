@@ -6,6 +6,8 @@ import java.util.List;
 public abstract class ObjectPool  <T extends Poolable> {
     protected List<T> activeList;
     protected List<T> freeList;
+    protected GameController gameController;
+    protected int initialCapacity;
 
     public List<T> getActiveList() {
         return activeList;
@@ -21,7 +23,9 @@ public abstract class ObjectPool  <T extends Poolable> {
         freeList.add(activeList.remove(index));
     }
 
-    public ObjectPool(int initialCapacity) {
+    public ObjectPool(GameController gameController) {
+        this.initialCapacity = 20;  //  размер пула объектов
+        this.gameController = gameController;
         this.activeList = new ArrayList<>(initialCapacity);
         this.freeList = new ArrayList<>(initialCapacity);
         for (int i = 0; i < initialCapacity; i++) {
@@ -42,6 +46,5 @@ public abstract class ObjectPool  <T extends Poolable> {
                 free(i);
             }
         }
-
     }
 }

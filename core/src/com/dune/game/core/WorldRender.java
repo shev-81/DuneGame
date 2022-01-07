@@ -15,10 +15,10 @@ public class WorldRender {
     public void render() {
         ScreenUtils.clear(0.1f, 0.1f, 0.1f, 1);
         batch.begin();
-        gameController.getBattleMap().render(batch);
-        for (Obstacles o : gameController.getObstacles())
-            o.render(batch);
-        gameController.getTank().render(batch);
+        gameController.getBattleMap().render(batch);        // отрисовка карты
+        gameController.getTank().render(batch);             // отрисовка танка
+        gameController.getEnemyController().render(batch);
+        gameController.getProjectesController().render(batch);
         batch.end();
     }
 }
