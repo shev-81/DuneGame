@@ -11,7 +11,6 @@ public class ProjectesController extends ObjectPool<Bullet>{
     public ProjectesController(GameController gameController) {
         super(gameController);
         this.sphereTexture = new TextureRegion(Assets.getInstance().getAtlas().findRegion("shootBall")).split(16, 16)[0];
-
     }
 
     public void render (SpriteBatch batch){

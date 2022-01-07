@@ -1,7 +1,7 @@
 package com.dune.game.core;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.math.Vector2;
 
 public class GameController {
 
@@ -13,9 +13,9 @@ public class GameController {
 
     // инициализация игровой логики
     public GameController() {
-        Assets.getInstance().loadAssets(); //загрузка ресурсов проекта
-        this.battleMap = new BattleMap(this);          // создание игровой карты
-        this.tank = new Tank(this);     //создание танка
+        Assets.getInstance().loadAssets();                          //загрузка ресурсов проекта
+        this.battleMap = new BattleMap(this);           // создание игровой карты
+        this.tank = new Tank(this);                     //создание танка
         this.projectesController = new ProjectesController(this);
         this.enemyController = new EnemyController(this);
     }
@@ -42,6 +42,7 @@ public class GameController {
 
     // апдейт всех созданных объектов
     public void update(float dt) {
+        battleMap.upDate(dt);
         tank.update(dt);
         projectesController.update(dt);
         enemyController.update(dt);
@@ -49,6 +50,8 @@ public class GameController {
     }
     //разрешение коллизий столкновений объектов
     public void collisions(float dt) {
+        int x=0;
+        int y=0;
         for (Ball o : enemyController.getFreeList()) {
             o.update(dt);
             if (tank.getPosition().dst(o.getPosition()) < 60) {              // метод dst() возвращает расстояние между векторами
@@ -63,6 +66,14 @@ public class GameController {
                     }
                 }
             }
+        }
+        for(Vector2 spiceV: battleMap.getSpiceArr()){   // собираем спайс на карте
+            if(tank.getPosition().dst(spiceV) < 20){
+                x = (int) (spiceV.x-40)/80;
+                y = (int) (spiceV.y-40)/80;
+                battleMap.getPosSpices()[x][y] = 0;
+            }
+
         }
     }
 }

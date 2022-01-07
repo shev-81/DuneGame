@@ -1,74 +1,81 @@
 
 images1.png
 format: RGBA8888
-filter: Linear,Linear
+filter: Nearest,Nearest
 repeat: none
-tank2
+spices
   rotate: false
   xy: 2, 2
+  size: 800, 80
+  orig: 800, 80
+  offset: 0, 0
+  index: -1
+tankanim
+  rotate: false
+  xy: 2, 84
+  size: 320, 64
+  orig: 320, 64
+  offset: 0, 0
+  index: -1
+SphereAnim
+  rotate: false
+  xy: 2, 150
+  size: 320, 32
+  orig: 320, 32
+  offset: 0, 0
+  index: -1
+tank2
+  rotate: false
+  xy: 324, 84
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 grass
   rotate: false
-  xy: 84, 2
+  xy: 324, 166
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
 blackhole
   rotate: false
-  xy: 166, 2
+  xy: 406, 84
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
-tankanim
+shootBall
   rotate: false
-  xy: 248, 2
-  size: 320, 64
-  orig: 320, 64
+  xy: 2, 184
+  size: 80, 16
+  orig: 80, 16
   offset: 0, 0
   index: -1
 turret
   rotate: false
-  xy: 570, 2
+  xy: 84, 184
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 tank
   rotate: false
-  xy: 636, 2
+  xy: 150, 184
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
-SphereAnim
-  rotate: false
-  xy: 248, 68
-  size: 320, 32
-  orig: 320, 32
-  offset: 0, 0
-  index: -1
-shootBall
-  rotate: false
-  xy: 2, 84
-  size: 80, 16
-  orig: 80, 16
-  offset: 0, 0
-  index: -1
 bullet2
   rotate: false
-  xy: 2, 102
+  xy: 2, 202
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 bullet
   rotate: false
-  xy: 20, 102
+  xy: 2, 220
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

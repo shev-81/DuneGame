@@ -1,6 +1,5 @@
 package com.dune.game.core;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
@@ -11,10 +10,10 @@ public class Ball extends GameObject implements Poolable {
     private float timePerFrame;
     private float moveTimer;
 
-    public Ball(float x, float y, GameController gameController) {
+    public Ball(float x, float y, GameController gameController, TextureRegion[] sphereTextures) {
         super(gameController);
         this.position.set(x, y);
-        this.sphereTextures = new TextureRegion(Assets.getInstance().getAtlas().findRegion("SphereAnim")).split(32, 32)[0];
+        this.sphereTextures = sphereTextures;
         timePerFrame = 0.2f; // время на показ 1 региона рисунка из анимации (иначе скорость анимации)
     }
 

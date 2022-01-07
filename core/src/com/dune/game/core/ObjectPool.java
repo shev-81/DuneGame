@@ -28,10 +28,8 @@ public abstract class ObjectPool  <T extends Poolable> {
         this.gameController = gameController;
         this.activeList = new ArrayList<>(initialCapacity);
         this.freeList = new ArrayList<>(initialCapacity);
-        for (int i = 0; i < initialCapacity; i++) {
-            this.freeList.add(newObject());
-        }
     }
+
     public T getActiveElement() {
         if(freeList.size()==0){
             freeList.add(newObject());
@@ -40,6 +38,7 @@ public abstract class ObjectPool  <T extends Poolable> {
         activeList.add(tempObject);
         return tempObject;
     }
+
     public void checkPool(){
         for (int i = activeList.size()-1; i >=0 ; i--) {
             if(!activeList.get(i).isActive()){

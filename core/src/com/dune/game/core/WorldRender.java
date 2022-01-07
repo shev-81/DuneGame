@@ -17,8 +17,8 @@ public class WorldRender {
         batch.begin();
         gameController.getBattleMap().render(batch);        // отрисовка карты
         gameController.getTank().render(batch);             // отрисовка танка
-        gameController.getEnemyController().render(batch);
         gameController.getProjectesController().render(batch);
+        gameController.getEnemyController().render(batch);
         batch.end();
     }
 }
