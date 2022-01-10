@@ -5,13 +5,11 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class EnemyController extends ObjectPool<Ball> {
 
-    private GameController gameController;
     private TextureRegion[] sphereTexture;
 
     public EnemyController(GameController gameController) {
         super(gameController);
-        this.gameController = gameController;
-        this.sphereTexture = new TextureRegion(Assets.getInstance().getAtlas().findRegion("SphereAnim")).split(32, 32)[0];
+        this.sphereTexture = Assets.getInstance().getAtlas().findRegion("SphereAnim").split(32, 32)[0];
         for (int i = 0; i <initialCapacity; i++) {
             freeList.add(newObject());
         }

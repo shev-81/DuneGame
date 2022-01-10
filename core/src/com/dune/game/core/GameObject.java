@@ -13,6 +13,13 @@ public abstract class GameObject {
         this.tmpV = new Vector2(0,0);
     }
 
+    public int getCellX(){
+        return (int) (position.x / BattleMap.CELL_SIZE);
+    }
+    public int getCellY(){
+        return (int) (position.y / BattleMap.CELL_SIZE);
+    }
+
     public Vector2 getPosition() {
         return position;
     }

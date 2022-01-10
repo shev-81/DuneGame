@@ -24,7 +24,7 @@ public abstract class ObjectPool  <T extends Poolable> {
     }
 
     public ObjectPool(GameController gameController) {
-        this.initialCapacity = 20;  //  размер пула объектов
+        this.initialCapacity = 10;  //  размер пула объектов
         this.gameController = gameController;
         this.activeList = new ArrayList<>(initialCapacity);
         this.freeList = new ArrayList<>(initialCapacity);
