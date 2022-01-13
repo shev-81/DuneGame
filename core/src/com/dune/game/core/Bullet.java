@@ -14,6 +14,7 @@ public class Bullet extends GameObject implements Poolable{
     private float moveTimer;
     private float speed = 500.0f;
     private boolean active = false;
+    private int damage;
 
     public Bullet(GameController gameController) {
         super(gameController);
@@ -22,7 +23,7 @@ public class Bullet extends GameObject implements Poolable{
     }
 
     public void render(SpriteBatch batch) {
-        batch.draw(getCurrentFrame(), shootVector.x-8, shootVector.y-8, 8, 8, 16, 16, 3, 3, angle);
+        batch.draw(getCurrentFrame(), shootVector.x-8, shootVector.y-8, 8, 8, 16, 16, 2, 2, angle);
     }
 
     public void update(float dt) {
@@ -36,10 +37,15 @@ public class Bullet extends GameObject implements Poolable{
         return sphereTextures[frameIndex];
     }
 
-    public void setup(float angle, Vector2 tmpVector, TextureRegion [] sphereTextures){
-        this.sphereTextures =  sphereTextures; // new TextureRegion(atlas.findRegion("shootBall")).split(16, 16)[0];
+    public void setup(float angle, Vector2 tmpVector, TextureRegion [] sphereTextures, int damage){
+        this.sphereTextures =  sphereTextures;
         this.shootVector.set(tmpVector);
         this.angle=angle;
+        this.damage = damage;
+    }
+
+    public int getDamage() {
+        return damage;
     }
 
     public void setActive(boolean active) {

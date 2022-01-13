@@ -26,9 +26,9 @@ public class ProjectesController extends ObjectPool<Bullet>{
         checkPool();
     }
 
-    public void setup(float angle, Vector2 tmpV){
+    public void setup(float angle, Vector2 tmpV, int damage){
         Bullet bullet = getActiveElement();
-        bullet.setup(angle, tmpV, sphereTexture);
+        bullet.setup(angle, tmpV, sphereTexture, damage);
         bullet.setActive(true);
     }
 

@@ -54,10 +54,6 @@ public class Assets {
         assetManager.load("fonts/Roboto-Medium" + size + ".ttf", BitmapFont.class, fontParameter);
     }
 
-//    public void makeLinks() {
-//        textureAtlas = assetManager.get("images/game.pack", TextureAtlas.class);
-//    }
-
     public void clear() {
         assetManager.clear();
     }

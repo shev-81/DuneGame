@@ -1,16 +1,23 @@
 package com.dune.game.core;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
-
+import com.badlogic.gdx.math.Vector2;
 
 public class BattleMap extends GameObject{
     private TextureRegion grassTexture;
+    private TextureRegion choiceTexture;
     private TextureRegion [] spicesTextures;
+    private TextureRegion [] clickmouseTextures;
+
     private float moveTimer;
     private float timePerFrame;
     private Cell [][] cells;
+    private Vector2 startSelection;
+    private Vector2 endSelection;
     public static final int COLUMNS_COUNT = 16;
     public static final int ROWS_COUNT = 9;
     public static final int CELL_SIZE = 80;
@@ -50,10 +57,10 @@ public class BattleMap extends GameObject{
         private void render(SpriteBatch batch){
             if (resource > 0) {               // если есть ресурс
                 float scale = 0.5f + 0.15f * resource;
-                batch.draw(getCurrentFrame(), cellX*CELL_SIZE, cellY*CELL_SIZE, 40, 40,80,80,scale,scale,0);
+                batch.draw(getCurrentFrame(spicesTextures), cellX*CELL_SIZE, cellY*CELL_SIZE, 40, 40,80,80,scale,scale,0);
             }else {
                 if(resourceRegenerate>0.01){
-                    batch.draw(getCurrentFrame(), cellX*CELL_SIZE, cellY*CELL_SIZE, 40, 40,80,80, 0.1f, 0.1f,0);
+                    batch.draw(getCurrentFrame(spicesTextures), cellX*CELL_SIZE, cellY*CELL_SIZE, 40, 40,80,80, 0.1f, 0.1f,0);
                 }
             }
         }
@@ -62,9 +69,13 @@ public class BattleMap extends GameObject{
     public BattleMap (GameController gameController){
         super(gameController);
         this.grassTexture = Assets.getInstance().getAtlas().findRegion("grass");
+        this.choiceTexture = Assets.getInstance().getAtlas().findRegion("choiceline");
         this.spicesTextures = new TextureRegion(Assets.getInstance().getAtlas().findRegion("spices")).split(80, 80)[0];
+        this.clickmouseTextures = new TextureRegion(Assets.getInstance().getAtlas().findRegion("clickmouse")).split(24, 24)[0];
         this.timePerFrame = 0.2f; // время на показ 1 региона рисунка из анимации (иначе скорость анимации)
         this.cells = new Cell[COLUMNS_COUNT][ROWS_COUNT];        // координаты спайса на карте по ячейкам 80 * 80
+        this.startSelection = new Vector2();
+        this.endSelection = new Vector2();
         loadSpices();
     }
 
@@ -96,19 +107,47 @@ public class BattleMap extends GameObject{
     }
 
     // метод вызывается из WorldRender
-    public void render(SpriteBatch batch){
+    public void render(SpriteBatch batch) {
+        // рорисовка тайлов ресурсов
         for (int i = 0; i < COLUMNS_COUNT; i++) {
             for (int j = 0; j < ROWS_COUNT; j++) {
-                batch.draw(grassTexture, i*CELL_SIZE,j*CELL_SIZE);
+                batch.draw(grassTexture, i * CELL_SIZE, j * CELL_SIZE);
                 cells[i][j].render(batch);
+            }
+        }
+        if(Gdx.input.isButtonPressed (Input.Buttons.RIGHT)){
+
+            batch.draw(getCurrentFrame(clickmouseTextures), Gdx.input.getX()-12, Gdx.graphics.getHeight() - Gdx.input.getY()-12, 12, 12,24,24, 1.2f, 1.2f,0);
+        }
+        // отрисовка рамки выделения обласи захвата мышкой
+        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+            endSelection.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
+            startSelection.set(gameController.getStartSelection());
+            for (int i = 1; i < Math.abs(endSelection.x - startSelection.x); i++) {
+                if (endSelection.x < startSelection.x) {
+                    batch.draw(choiceTexture, startSelection.x - i, endSelection.y, 2, 2);    // верх
+                    batch.draw(choiceTexture, startSelection.x - i, startSelection.y, 2, 2);  // низ
+                } else {
+                    batch.draw(choiceTexture, startSelection.x + i, endSelection.y, 2, 2);    // верх
+                    batch.draw(choiceTexture, startSelection.x + i, startSelection.y, 2, 2);  // низ
+                }
+            }
+            for (int i = 1; i < Math.abs(endSelection.y - startSelection.y); i++) {
+                if (endSelection.y < startSelection.y) {
+                    batch.draw(choiceTexture, startSelection.x, startSelection.y - i, 2, 2);  // лево
+                    batch.draw(choiceTexture, endSelection.x, startSelection.y - i, 2, 2);    // право
+                } else {
+                    batch.draw(choiceTexture, startSelection.x, startSelection.y + i, 2, 2);  // лево
+                    batch.draw(choiceTexture, endSelection.x, startSelection.y + i, 2, 2);    // право
+                }
             }
         }
     }
 
     // метод выдающий по порядку скрины анимации
-    private TextureRegion getCurrentFrame() {
-        int frameIndex = (int) (moveTimer / timePerFrame) % spicesTextures.length;
-        return spicesTextures[frameIndex];
+    private TextureRegion getCurrentFrame(TextureRegion [] textureRegions) {
+        int frameIndex = (int) (moveTimer / timePerFrame) % textureRegions.length;
+        return textureRegions[frameIndex];
     }
 
     public void upDate(float dt) {

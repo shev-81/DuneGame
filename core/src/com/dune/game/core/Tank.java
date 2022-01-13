@@ -4,9 +4,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
 public class Tank extends GameObject implements Poolable {
+
     public enum Owner {
         PLAYER, AI
     }
@@ -15,6 +17,7 @@ public class Tank extends GameObject implements Poolable {
     private float angle;
     private float speed;
     private TextureRegion[] tankTextures;
+    private TextureRegion[] weaponsTextures;
     private TextureRegion progressBarTextures;
     private TextureRegion borderline;
     private Vector2 destination;
@@ -26,42 +29,51 @@ public class Tank extends GameObject implements Poolable {
     public static final int CONTAINER_POINT = 10;
     public static final int CONTAINER_CAPACITY = 50;
     private float hp;
-    private boolean chosenStatus;
+    private float hpMax = 100;
+    private Tank target;
 
     public Tank(GameController gameController) {
         super(gameController);
         this.progressBarTextures = Assets.getInstance().getAtlas().findRegion("progressbar");
         this.borderline = Assets.getInstance().getAtlas().findRegion("borderline");
+        this.weaponsTextures = new TextureRegion[]{
+                new TextureRegion(Assets.getInstance().getAtlas().findRegion("turret")),
+                new TextureRegion(Assets.getInstance().getAtlas().findRegion("harvester"))
+        };
         this.timePerFrame = 0.08f;
         this.rotationSpeed = 180.0f;
-        this.chosenStatus = false;
     }
 
     public void setup(Owner owner, float x, float y) {
-        this.tankTextures = Assets.getInstance().getAtlas().findRegion("tankanim").split(64, 64)[0];
+        this.tankTextures = Assets.getInstance().getAtlas().findRegion("tankcore").split(64, 64)[0];
         this.ownerType = owner;
         this.position.set(x, y);
         this.destination = new Vector2(position);
         this.speed = 140.0f;
-        this.weapon = new Weapon(Weapon.Type.HARVEST, 3.0f, 1);
-        this.hp = 100;
+        if(MathUtils.random()<0.5){
+            this.weapon = new Weapon(Weapon.Type.HARVEST, 3.0f, 1);
+        }else{
+            this.weapon = new Weapon(Weapon.Type.GROUND, 1.5f, 10);
+        }
+        this.hp = hpMax;
         this.container = 0; // емкость ресурсов
-
     }
 
     // метод вызывается из WorldRender
     public void render(SpriteBatch batch) {
+
         switch (ownerType) {
             case PLAYER:
                 batch.draw(getCurrentFrame(), position.x - 40, position.y - 40, 40, 40, 80, 80, 0.8f, 0.8f, angle);
+                batch.draw(weaponsTextures[weapon.getType().getImageIndex()], position.x - 40, position.y - 40, 40, 40, 80, 80, 0.8f, 0.8f, weapon.getAngle());
                 break;
             case AI:
                 batch.setColor(1.0f, 0.5f, 0.0f, 1.0f);
                 batch.draw(getCurrentFrame(), position.x - 40, position.y - 40, 40, 40, 80, 80, 0.8f, 0.8f, angle);
+                batch.draw(weaponsTextures[weapon.getType().getImageIndex()], position.x - 40, position.y - 40, 40, 40, 80, 80, 0.8f, 0.8f, weapon.getAngle());
                 batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
                 break;
         }
-
 
         // если активен сбор ресурса отрисовка прогресса тика сбора
         if(container <= CONTAINER_CAPACITY){
@@ -73,6 +85,7 @@ public class Tank extends GameObject implements Poolable {
                 batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
             }
         }
+
         // отрисовка HP танка
         batch.setColor(0.2f, 0.0f, 0.0f, 1.0f);
         batch.draw(progressBarTextures, position.x - 32, position.y + 30, 64, 12);
@@ -88,8 +101,9 @@ public class Tank extends GameObject implements Poolable {
             batch.draw(progressBarTextures, position.x + 36, position.y - 28 + (10 * (i - 1)), 6, 6);
             batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
         }
-        // зеленая рамка выбора
-        if(isChosenStatus()){
+
+        // рамка выбора
+        if(gameController.isTankSelection(this)){
             switch (ownerType){
                 case PLAYER:
                     batch.setColor(0.0f, 1.0f, 0.0f, 1.0f);
@@ -112,47 +126,20 @@ public class Tank extends GameObject implements Poolable {
     }
 
     public void update(Float dt) {
-
-        // реакция на левый клик мыши
-        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-            tmpV.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
-            for (Tank tank : gameController.getTankController().getActiveList()) {
-                if (Math.abs(tmpV.dst(tank.getPosition())) < 30) {
-                    setChosenStatus(true);
-                } else {
-                    tank.setChosenStatus(false);
-                }
+        // если цель выбрана движемся к ней до расстояния 200
+        if(target != null){
+            destination.set(target.position);
+            if(position.dst(target.position) < 200){
+                destination.set(position);
             }
-        }
 
-        // реакция на правый клик мыши
-        if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && ownerType == Owner.PLAYER && chosenStatus) {
-            destination.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
         }
-        if (position.dst(destination) > 3.0f) {                 // определение куда повернуться для движения
+        // определение куда повернуться для движения
+        if (position.dst(destination) > 3.0f) {
             float angleTo = tmpV.set(destination).sub(position).angle();
-            if (Math.abs(angle - angleTo) > 3.0f) {
-                if (angle > angleTo) {
-                    if (Math.abs(angle - angleTo) <= 180.0f) {
-                        angle -= rotationSpeed * dt;
-                    } else {
-                        angle += rotationSpeed * dt;
-                    }
-                }
-                if (angle < angleTo) {
-                    if (Math.abs(angle - angleTo) <= 180.0f) {
-                        angle += rotationSpeed * dt;
-                    } else {
-                        angle -= rotationSpeed * dt;
-                    }
-                }
-            }
-            if (angle < 0.0f) {
-                angle += 360.0f;
-            }
-            if (angle > 360.0f) {
-                angle -= 360.0f;
-            }
+
+            angle = rotateTo(angle, angleTo, rotationSpeed, dt);
+
             moveTimer += dt;
             tmpV.set(speed, 0).rotate(angle);    // определение направления
             position.mulAdd(tmpV, dt);          // изменения метоположения в зависимости от dt
@@ -162,21 +149,44 @@ public class Tank extends GameObject implements Poolable {
         }
         updateWeapon(dt);
         chekCollision(dt);
-//        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-//            angle += 180 * dt;
-//        }
-//
-//        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-//            angle -= 180 * dt;
-//        }
-//
-//        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-//            position.add(speed * MathUtils.cosDeg(angle) * dt, speed * MathUtils.sinDeg(angle) * dt);
-//            moveTimer += dt;
-//        }
-//         выстрел из пушки по нажатию
+
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             shoot();
+        }
+    }
+
+    public void setTarget(Tank target) {
+        this.target = target;
+    }
+
+    // метод изменяет угол srcAngle до angleTo за дельту времени dt со скоростью rotationSpeed
+    public float rotateTo(float srcAngle, float angleTo, float rSpeed, float dt ) {
+        if (Math.abs(angle - angleTo) > 3.0f) {
+            if ((srcAngle > angleTo && Math.abs(srcAngle - angleTo) <= 180.0f) || (srcAngle < angleTo && Math.abs(srcAngle - angleTo) > 180.0f)) {
+                srcAngle -= rSpeed * dt;
+            } else {
+                srcAngle += rSpeed * dt;
+            }
+        }
+        if (srcAngle < 0.0f) {
+            srcAngle += 360.0f;
+        }
+        if (srcAngle > 360.0f) {
+            srcAngle -= 360.0f;
+        }
+        return srcAngle;
+    }
+
+    // метод определения остановки дистанции на которой произойдет остановка если
+    // находимся у точки назначения
+    public void moveBy(Vector2 value) {
+        boolean stayStill = false;
+        if (position.dst(destination) < 5.0f) {
+            stayStill = true;
+        }
+        position.add(value);
+        if (stayStill) {
+            destination.set(position);
         }
     }
 
@@ -184,7 +194,16 @@ public class Tank extends GameObject implements Poolable {
         return hp / 100;
     }
 
+    // перезарядка оружия танка
     public void updateWeapon(float dt) {
+        if (weapon.getType() == Weapon.Type.GROUND && target != null) {
+            float angleTo = tmpV.set(target.position).sub(position).angle();
+            weapon.setAngle(rotateTo(weapon.getAngle(), angleTo, 180.0f, dt));
+            int power = weapon.use(dt);
+            if(power > -1){
+                gameController.getProjectesController().setup(weapon.getAngle(), position, weapon.getPower());
+            }
+        }
         if (weapon.getType() == Weapon.Type.HARVEST) {
             if (gameController.getBattleMap().getResourceCount(this) > 0) {
                 int result = weapon.use(dt);
@@ -203,7 +222,7 @@ public class Tank extends GameObject implements Poolable {
         tmpV.rotate(angle);
         tmpV.scl(20);
         tmpV.add(position);
-        gameController.getProjectesController().setup(angle, tmpV);
+        gameController.getProjectesController().setup(angle, tmpV, getWeapon().getPower());
 
     }
 
@@ -213,13 +232,6 @@ public class Tank extends GameObject implements Poolable {
         return tankTextures[frameIndex];
     }
 
-    public void setChosenStatus(boolean chosenStatus) {
-        this.chosenStatus = chosenStatus;
-    }
-
-    public boolean isChosenStatus() {
-        return chosenStatus;
-    }
 
     public Vector2 getPosition() {
         return position;
@@ -244,6 +256,25 @@ public class Tank extends GameObject implements Poolable {
         if ((int) position.x < 40) {
             position.x = 40;
         }
+    }
+
+    public Weapon getWeapon() {
+        return weapon;
+    }
+
+    public void commandMoveTo(Vector2 point){
+        destination.set(point);
+    }
+    public void commandAttack(Tank target){
+        this.target = target;
+    }
+
+    public Owner getOwnerType() {
+        return ownerType;
+    }
+
+    public void setHp(float damage) {
+        this.hp -= damage;
     }
 
     @Override

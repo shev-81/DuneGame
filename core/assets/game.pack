@@ -10,80 +10,94 @@ spices
   orig: 800, 80
   offset: 0, 0
   index: -1
-tank2
+grass
   rotate: false
   xy: 2, 84
   size: 80, 80
   orig: 80, 80
   offset: 0, 0
   index: -1
-grass
-  rotate: false
-  xy: 2, 166
-  size: 80, 80
-  orig: 80, 80
-  offset: 0, 0
-  index: -1
-tankanim
+tankcore
   rotate: false
   xy: 84, 84
   size: 320, 64
   orig: 320, 64
   offset: 0, 0
   index: -1
-turret
+tankanim
   rotate: false
   xy: 84, 150
+  size: 320, 64
+  orig: 320, 64
+  offset: 0, 0
+  index: -1
+turret
+  rotate: false
+  xy: 2, 166
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 tank
   rotate: false
-  xy: 150, 150
+  xy: 406, 84
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
-SphereAnim
+harvester
   rotate: false
-  xy: 406, 84
-  size: 320, 32
-  orig: 320, 32
+  xy: 406, 150
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+clickmouse
+  rotate: false
+  xy: 84, 216
+  size: 168, 24
+  orig: 168, 24
   offset: 0, 0
   index: -1
 shootBall
   rotate: false
-  xy: 216, 150
+  xy: 2, 232
   size: 80, 16
   orig: 80, 16
   offset: 0, 0
   index: -1
 bullet2
   rotate: false
-  xy: 84, 216
+  xy: 254, 216
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 bullet
   rotate: false
-  xy: 84, 234
+  xy: 254, 234
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 progressbar
   rotate: false
-  xy: 150, 216
+  xy: 84, 242
   size: 60, 8
   orig: 60, 8
   offset: 0, 0
   index: -1
 borderline
   rotate: false
-  xy: 2, 248
+  xy: 2, 250
   size: 80, 2
   orig: 80, 2
+  offset: 0, 0
+  index: -1
+choiceline
+  rotate: false
+  xy: 68, 166
+  size: 2, 2
+  orig: 2, 2
   offset: 0, 0
   index: -1
