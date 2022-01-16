@@ -3,22 +3,25 @@ package com.dune.game;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.dune.game.screens.GameScreen;
+import com.badlogic.gdx.graphics.GL20;
+import com.dune.game.screens.ScreenManager;
 
 public class DuneGame extends Game {
     private SpriteBatch batch;
-    private GameScreen gameScreen;
 
     @Override
     public void create() {
-        this.batch = new SpriteBatch();
-        this.gameScreen = new GameScreen(batch);
-        this.setScreen(gameScreen);
+        batch = new SpriteBatch();
+        ScreenManager.getInstance().init(this, batch);
+        ScreenManager.getInstance().changeScreen(ScreenManager.ScreenType.MENU);
     }
 
     @Override
-    public void render() {                               // метод крутится 60 вызовов в секунду
-        getScreen().render(Gdx.graphics.getDeltaTime());
+    public void render() {
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        float dt = Gdx.graphics.getDeltaTime();
+        getScreen().render(dt);
     }
 
     @Override

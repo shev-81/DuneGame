@@ -6,6 +6,8 @@ import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.dune.game.screens.ScreenManager;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,58 +21,62 @@ public class GameController {
     private List<Tank> selectedUnits;
     private Vector2 startSelection;
     private Vector2 endSelection;
+    private Vector2 mouse;
 
 
     // инициализация игровой логики
     public GameController() {
-        Assets.getInstance().loadAssets();                          //загрузка ресурсов проекта
         this.battleMap = new BattleMap(this);           // создание игровой карты
         this.projectesController = new ProjectesController(this);
         this.tankController = new TankController(this);
-        for (int i = 0; i < 3; i++) {
-            this.tankController.setup(MathUtils.random(50, 1100),MathUtils.random(50,650), Tank.Owner.PLAYER);       //создание танка при помощи setup
-            this.tankController.setup(MathUtils.random(50, 1100),MathUtils.random(50,650), Tank.Owner.AI);
+        for (int i = 0; i < 6; i++) {
+            this.tankController.setup(MathUtils.random(50, 1100), MathUtils.random(50, 650), Tank.Owner.PLAYER);       //создание танка при помощи setup
+            this.tankController.setup(MathUtils.random(50, 1100), MathUtils.random(50, 650), Tank.Owner.PLAYER);       //создание танка при помощи setup
+            this.tankController.setup(MathUtils.random(50, 1100), MathUtils.random(50, 650), Tank.Owner.AI);
         }
         this.selectedUnits = new ArrayList<>();
         this.tmpV = new Vector2();
         this.startSelection = new Vector2();
         this.endSelection = new Vector2();
+        this.mouse = new Vector2();
+
         prepareSelection();
     }
 
     // метод выделения юнитов на карте
-    public void prepareSelection(){
-        InputProcessor ip = new InputAdapter(){ // отвечает за массовое выделение юнитов на карте
+    public void prepareSelection() {
+        InputProcessor ip = new InputAdapter() { // отвечает за массовое выделение юнитов на карте
             @Override
-            public boolean touchDown(int screenX, int screenY, int pointer, int button){  // левая кнопка или тач нажата и удерживается
-                if(button == Input.Buttons.LEFT){
-                    startSelection.set(screenX, Gdx.graphics.getHeight() - screenY);
+            public boolean touchDown(int screenX, int screenY, int pointer, int button) {  // левая кнопка или тач нажата и удерживается
+                if (button == Input.Buttons.LEFT) {
+                    startSelection.set(mouse);
                 }
                 return true;
             }
+
             @Override
-            public boolean touchUp (int screenX, int screenY, int pointer, int button) {  // кнопка отпущена
-                if(button == Input.Buttons.LEFT){
-                    tmpV.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
-                    if(tmpV.x < startSelection.x){    // инвертирование выделения юнитов с другой стороны
+            public boolean touchUp(int screenX, int screenY, int pointer, int button) {  // кнопка отпущена
+                if (button == Input.Buttons.LEFT) {
+                    tmpV.set(mouse);
+                    if (tmpV.x < startSelection.x) {    // инвертирование выделения юнитов с другой стороны
                         float t = tmpV.x;
                         tmpV.x = startSelection.x;
                         startSelection.x = t;
                     }
-                    if(tmpV.y>startSelection.y){
+                    if (tmpV.y > startSelection.y) {
                         float t = tmpV.y;
                         tmpV.y = startSelection.y;
                         startSelection.y = t;
                     }
                     selectedUnits.clear();
-                    if(Math.abs(tmpV.x - startSelection.x) > 20 & Math.abs(tmpV.y - startSelection.y) > 20){ // обработка простого клика по месту
+                    if (Math.abs(tmpV.x - startSelection.x) > 20 & Math.abs(tmpV.y - startSelection.y) > 20) { // обработка простого клика по месту
                         for (Tank tank : tankController.getActiveList()) {
-                            if(tank.getOwnerType() == Tank.Owner.PLAYER && tank.getPosition().x > startSelection.x && tank.getPosition().x < tmpV.x
-                               && tank.getPosition().y > tmpV.y && tank.getPosition().y < startSelection.y ){
+                            if (tank.getOwnerType() == Tank.Owner.PLAYER && tank.getPosition().x > startSelection.x && tank.getPosition().x < tmpV.x
+                                    && tank.getPosition().y > tmpV.y && tank.getPosition().y < startSelection.y) {
                                 selectedUnits.add(tank);
                             }
                         }
-                    }else {
+                    } else {
                         for (Tank tank : tankController.getActiveList()) {
                             if (Math.abs(tmpV.dst(tank.getPosition())) < 30) {
                                 selectedUnits.add(tank);
@@ -88,6 +94,8 @@ public class GameController {
 
     // апдейт всех созданных объектов
     public void update(float dt) {
+        mouse.set(Gdx.input.getX(), Gdx.input.getY());              // привязка координат курсора мыши к окну в игре
+        ScreenManager.getInstance().getViewport().unproject(mouse);
         battleMap.upDate(dt);
         tankController.update(dt);
         projectesController.update(dt);
@@ -97,19 +105,16 @@ public class GameController {
     //разрешение коллизий столкновений объектов
     public void collisions(float dt) {
         // проверяем попадания активных снарядов по вражеским танкам
-        for(Tank tank: tankController.getActiveList()){
-            if(tank.getOwnerType() == Tank.Owner.AI){
-                for (Bullet bullet: projectesController.getActiveList()){
+        for (Bullet bullet : projectesController.getActiveList()) {
+            for (Tank tank : tankController.getActiveList()) {
+                if (tank.getOwnerType() == Tank.Owner.AI) {
                     if (bullet.getShootVector().dst(tank.getPosition()) < 40) {
-                        tank.getPosition().x = (float) Math.random() * 1160 + 80;
-                        tank.getPosition().y = (float) Math.random() * 560 + 80;
                         tank.setHp(bullet.getDamage());
                         bullet.setActive(false);
                     }
                 }
             }
         }
-
         // сталкивается ли танк с другими танками (если танков больше чем 1 в игре)
         for (int i = 0; i < tankController.activeList.size() - 1; i++) {
             Tank t1 = tankController.getActiveList().get(i);
@@ -127,6 +132,10 @@ public class GameController {
         }
     }
 
+    public Vector2 getMouse() {
+        return mouse;
+    }
+
     public Vector2 getStartSelection() {
         return startSelection;
     }
@@ -139,7 +148,7 @@ public class GameController {
         return selectedUnits;
     }
 
-    public boolean isTankSelection(Tank tank){
+    public boolean isTankSelection(Tank tank) {
         return selectedUnits.contains(tank);
     }
 

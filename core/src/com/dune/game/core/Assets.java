@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
+import com.dune.game.screens.ScreenManager;
 
 public class Assets {
 
@@ -19,6 +20,7 @@ public class Assets {
     private Assets() {
         assetManager = new AssetManager();
     }
+
     public static Assets getInstance() {
         return ourInstance;
     }
@@ -31,11 +33,30 @@ public class Assets {
         return assetManager;
     }
 
-    public void loadAssets() {
-        assetManager.load("game.pack", TextureAtlas.class);
-        createStandardFont(12);
-        assetManager.finishLoading();
-        textureAtlas = assetManager.get("game.pack");
+    public void loadAssets(ScreenManager.ScreenType type) {
+        switch (type) {
+            case MENU:
+                assetManager.load("game.pack", TextureAtlas.class);
+                createStandardFont(14);
+                createStandardFont(24);
+                createStandardFont(72);
+                break;
+            case GAME:
+                assetManager.load("game.pack", TextureAtlas.class);
+                createStandardFont(32);
+                createStandardFont(12);
+                break;
+        }
+    }
+
+    //    public void loadAssets() {
+//        assetManager.load("game.pack", TextureAtlas.class);
+//        createStandardFont(12);
+//        assetManager.finishLoading();
+//        textureAtlas = assetManager.get("game.pack");
+//    }
+    public void makeLinks() {
+        textureAtlas = assetManager.get("game.pack", TextureAtlas.class);
     }
 
     public void createStandardFont(int size) {

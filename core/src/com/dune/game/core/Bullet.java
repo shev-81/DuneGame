@@ -15,6 +15,7 @@ public class Bullet extends GameObject implements Poolable{
     private float speed = 500.0f;
     private boolean active = false;
     private int damage;
+    private Tank tank;
 
     public Bullet(GameController gameController) {
         super(gameController);
@@ -37,11 +38,16 @@ public class Bullet extends GameObject implements Poolable{
         return sphereTextures[frameIndex];
     }
 
-    public void setup(float angle, Vector2 tmpVector, TextureRegion [] sphereTextures, int damage){
+    public Tank getTank() {
+        return tank;
+    }
+
+    public void setup(Tank tank, TextureRegion [] sphereTextures){
+        this.tank = tank;
         this.sphereTextures =  sphereTextures;
-        this.shootVector.set(tmpVector);
-        this.angle=angle;
-        this.damage = damage;
+        this.shootVector.set(tank.getPosition());
+        this.angle=tank.getWeapon().getAngle();
+        this.damage = tank.getWeapon().getPower();
     }
 
     public int getDamage() {

@@ -7,9 +7,11 @@ import com.badlogic.gdx.math.Vector2;
 public class ProjectesController extends ObjectPool<Bullet>{
 
     private TextureRegion [] sphereTexture;
+    private Vector2 tmpV;
 
     public ProjectesController(GameController gameController) {
         super(gameController);
+        this.tmpV = new Vector2();
         this.sphereTexture = new TextureRegion(Assets.getInstance().getAtlas().findRegion("shootBall")).split(16, 16)[0];
     }
 
@@ -26,9 +28,9 @@ public class ProjectesController extends ObjectPool<Bullet>{
         checkPool();
     }
 
-    public void setup(float angle, Vector2 tmpV, int damage){
+    public void setup(Tank tank){
         Bullet bullet = getActiveElement();
-        bullet.setup(angle, tmpV, sphereTexture, damage);
+        bullet.setup(tank, sphereTexture);
         bullet.setActive(true);
     }
 

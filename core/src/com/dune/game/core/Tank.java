@@ -1,7 +1,6 @@
 package com.dune.game.core;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -132,7 +131,10 @@ public class Tank extends GameObject implements Poolable {
             if(position.dst(target.position) < 200){
                 destination.set(position);
             }
-
+        }
+        // если цель танка мертва то сбрасываем ему цель
+        if(target != null && !target.isActive()){
+            target = null;
         }
         // определение куда повернуться для движения
         if (position.dst(destination) > 3.0f) {
@@ -150,9 +152,9 @@ public class Tank extends GameObject implements Poolable {
         updateWeapon(dt);
         chekCollision(dt);
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            shoot();
-        }
+//        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+//            shoot();
+//        }
     }
 
     public void setTarget(Tank target) {
@@ -181,7 +183,7 @@ public class Tank extends GameObject implements Poolable {
     // находимся у точки назначения
     public void moveBy(Vector2 value) {
         boolean stayStill = false;
-        if (position.dst(destination) < 5.0f) {
+        if (Math.abs(position.dst(destination)) < 25.0f) {
             stayStill = true;
         }
         position.add(value);
@@ -200,8 +202,8 @@ public class Tank extends GameObject implements Poolable {
             float angleTo = tmpV.set(target.position).sub(position).angle();
             weapon.setAngle(rotateTo(weapon.getAngle(), angleTo, 180.0f, dt));
             int power = weapon.use(dt);
-            if(power > -1){
-                gameController.getProjectesController().setup(weapon.getAngle(), position, weapon.getPower());
+            if(power > -1 && Math.abs(weapon.getAngle() - angleTo) < 3){
+                gameController.getProjectesController().setup(this);
             }
         }
         if (weapon.getType() == Weapon.Type.HARVEST) {
@@ -217,21 +219,20 @@ public class Tank extends GameObject implements Poolable {
     }
 
     // метод определяет параметры для снаряда который будет выпущен следующим
-    public void shoot() {
-        tmpV.set(1, 0);
-        tmpV.rotate(angle);
-        tmpV.scl(20);
-        tmpV.add(position);
-        gameController.getProjectesController().setup(angle, tmpV, getWeapon().getPower());
-
-    }
+//    public void shoot() {
+//        tmpV.set(1, 0);
+//        tmpV.rotate(angle);
+//        tmpV.scl(20);
+//        tmpV.add(position);
+//        gameController.getProjectesController().setup(angle, tmpV, getWeapon().getPower());
+//
+//    }
 
     //анимация танка
     private TextureRegion getCurrentFrame() {
         int frameIndex = (int) (moveTimer / timePerFrame) % tankTextures.length;
         return tankTextures[frameIndex];
     }
-
 
     public Vector2 getPosition() {
         return position;
@@ -258,6 +259,10 @@ public class Tank extends GameObject implements Poolable {
         }
     }
 
+    public Tank getTarget() {
+        return target;
+    }
+
     public Weapon getWeapon() {
         return weapon;
     }
@@ -273,8 +278,13 @@ public class Tank extends GameObject implements Poolable {
         return ownerType;
     }
 
-    public void setHp(float damage) {
+    public float setHp(float damage) {
         this.hp -= damage;
+        return hp;
+    }
+
+    public float getHp() {
+        return hp;
     }
 
     @Override

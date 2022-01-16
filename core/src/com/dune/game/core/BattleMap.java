@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.dune.game.screens.ScreenManager;
 
 public class BattleMap extends GameObject{
     private TextureRegion grassTexture;
@@ -18,6 +19,7 @@ public class BattleMap extends GameObject{
     private Cell [][] cells;
     private Vector2 startSelection;
     private Vector2 endSelection;
+    private Vector2 mouse;
     public static final int COLUMNS_COUNT = 16;
     public static final int ROWS_COUNT = 9;
     public static final int CELL_SIZE = 80;
@@ -72,10 +74,11 @@ public class BattleMap extends GameObject{
         this.choiceTexture = Assets.getInstance().getAtlas().findRegion("choiceline");
         this.spicesTextures = new TextureRegion(Assets.getInstance().getAtlas().findRegion("spices")).split(80, 80)[0];
         this.clickmouseTextures = new TextureRegion(Assets.getInstance().getAtlas().findRegion("clickmouse")).split(24, 24)[0];
-        this.timePerFrame = 0.2f; // время на показ 1 региона рисунка из анимации (иначе скорость анимации)
+        this.timePerFrame = 0.1f; // время на показ 1 региона рисунка из анимации (иначе скорость анимации)
         this.cells = new Cell[COLUMNS_COUNT][ROWS_COUNT];        // координаты спайса на карте по ячейкам 80 * 80
         this.startSelection = new Vector2();
         this.endSelection = new Vector2();
+        this.mouse = new Vector2();
         loadSpices();
     }
 
@@ -116,12 +119,11 @@ public class BattleMap extends GameObject{
             }
         }
         if(Gdx.input.isButtonPressed (Input.Buttons.RIGHT)){
-
-            batch.draw(getCurrentFrame(clickmouseTextures), Gdx.input.getX()-12, Gdx.graphics.getHeight() - Gdx.input.getY()-12, 12, 12,24,24, 1.2f, 1.2f,0);
+            batch.draw(getCurrentFrame(clickmouseTextures), mouse.x-12, mouse.y-12, 12, 12,24,24, 1.2f, 1.2f,0);
         }
         // отрисовка рамки выделения обласи захвата мышкой
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-            endSelection.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
+            endSelection.set(mouse); // Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY()
             startSelection.set(gameController.getStartSelection());
             for (int i = 1; i < Math.abs(endSelection.x - startSelection.x); i++) {
                 if (endSelection.x < startSelection.x) {
@@ -151,6 +153,8 @@ public class BattleMap extends GameObject{
     }
 
     public void upDate(float dt) {
+        mouse.set(Gdx.input.getX(), Gdx.input.getY());   //определение координат мыши в зависимости от маштабирования экрана
+        ScreenManager.getInstance().getViewport().unproject(mouse);
         moveTimer +=dt;
         for (int i = 0; i < COLUMNS_COUNT; i++) {
             for (int j = 0; j < ROWS_COUNT; j++) {

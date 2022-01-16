@@ -4,14 +4,17 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.dune.game.screens.ScreenManager;
 
 public class TankController extends ObjectPool<Tank>{
     private Vector2 tmpV;
     private Tank aiTank;
+    private Vector2 mouse;
 
     public TankController(GameController gameController) {
         super(gameController);
         this.tmpV = new Vector2();
+        this.mouse = new Vector2();
     }
 
 
@@ -22,6 +25,8 @@ public class TankController extends ObjectPool<Tank>{
     }
 
     public void update(float dt){
+        mouse.set(Gdx.input.getX(), Gdx.input.getY());   //определение координат мыши в зависимости от маштабирования экрана
+        ScreenManager.getInstance().getViewport().unproject(mouse);
         for(int i = 0; i<activeList.size(); i++){
             activeList.get(i).update(dt);
         }
@@ -34,13 +39,13 @@ public class TankController extends ObjectPool<Tank>{
         // реакция на правый клик мыши
         if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)){
             for(Tank tank: gameController.getSelectedUnits()) {
-                if(tank.getOwnerType() == Tank.Owner.PLAYER && gameController.getSelectedUnits().contains(tank)){
-                    tmpV.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
+                if(tank.getOwnerType() == Tank.Owner.PLAYER){
+                    tmpV.set(mouse.x, mouse.y);
                     if (tank.getWeapon().getType() == Weapon.Type.HARVEST) {
                         tank.commandMoveTo(tmpV);
                     }
                     if (tank.getWeapon().getType() == Weapon.Type.GROUND) {
-                        aiTank = gameController.getTankController().getNearestAiTank(tmpV);
+                        aiTank = getNearestAiTank(tmpV);
                         if(aiTank == null){
                             tank.setTarget(null);
                             tank.commandMoveTo(tmpV);
