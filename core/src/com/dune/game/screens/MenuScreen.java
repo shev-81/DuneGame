@@ -1,8 +1,6 @@
 package com.dune.game.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -34,7 +32,6 @@ public class MenuScreen extends AbstractScreen {
         this.tmp1Texture = this.menuOneTexture;
         this.tmp2Texture = this.menuThowTexture;
         this.mouse = new Vector2();
-        prepareSelection();
     }
 
     @Override
@@ -43,9 +40,9 @@ public class MenuScreen extends AbstractScreen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
-        batch.draw(menuOneTexture, Gdx.graphics.getWidth()/2-75, 300);
+        batch.draw(menuOneTexture, 1280/2-75, 300);
         font24.draw(batch,"Play game", 0, 340, 1280,1,false);
-        batch.draw(menuThowTexture, Gdx.graphics.getWidth()/2-75, 240);
+        batch.draw(menuThowTexture, 1280/2-75, 240);
         font24.draw(batch,"Exit game", 0, 280, 1280,1,false);
         batch.end();
     }
@@ -53,37 +50,28 @@ public class MenuScreen extends AbstractScreen {
     public void update(float dt) {
         mouse.set(Gdx.input.getX(), Gdx.input.getY());              // привязка координат курсора мыши к окну в игре
         ScreenManager.getInstance().getViewport().unproject(mouse);
+        int x = (int)mouse.x;
+        int y = (int)mouse.y;
+        if(x > 1280/2-75 && x < 1280/2+75 && y > 300 && y < 360){
+            menuOneTexture = menuchoiceTexture;
+        }else{
+            menuOneTexture = tmp1Texture;
+        }
+        if(x > 1280/2-75 && x < 1280/2+75 && y > 240 && y < 300){
+            menuThowTexture = menuchoiceTexture;
+        }else{
+            menuThowTexture = tmp2Texture;
+        }
         if (Gdx.input.justTouched()) {
-            if(mouse.x > Gdx.graphics.getWidth()/2-75 && mouse.x < Gdx.graphics.getWidth()/2+75 && mouse.y > 300 && mouse.y < 360){
+            if(mouse.x > 1280/2-75 && mouse.x < 1280/2+75 && mouse.y > 300 && mouse.y < 360){
                 ScreenManager.getInstance().changeScreen(ScreenManager.ScreenType.GAME);
             }
-            if(mouse.x > Gdx.graphics.getWidth()/2-75 && mouse.x < Gdx.graphics.getWidth()/2+75 && mouse.y > 240 && mouse.y < 300){
+            if(mouse.x > 1280/2-75 && mouse.x < 1280/2+75 && mouse.y > 240 && mouse.y < 300){
                 System.exit(0);
             }
         }
     }
 
-    public void prepareSelection() {
-        InputProcessor ip = new InputAdapter() { // отвечает за массовое выделение юнитов на карте
-            @Override
-            public boolean mouseMoved (int screenX, int screenY) {
-                int x = screenX;
-                int y = Gdx.graphics.getHeight() - screenY;
-                if(x > Gdx.graphics.getWidth()/2-75 && x < Gdx.graphics.getWidth()/2+75 && y > 300 && y < 360){
-                    menuOneTexture = menuchoiceTexture;
-                }else{
-                    menuOneTexture = tmp1Texture;
-                }
-                if(x > Gdx.graphics.getWidth()/2-75 && x < Gdx.graphics.getWidth()/2+75 && y > 240 && y < 300){
-                    menuThowTexture = menuchoiceTexture;
-                }else{
-                    menuThowTexture = tmp2Texture;
-                }
-                return true;
-            }
-        };
-        Gdx.input.setInputProcessor(ip);
-    }
     @Override
     public void dispose() {
     }

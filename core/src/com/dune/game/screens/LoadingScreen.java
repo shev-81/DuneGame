@@ -31,9 +31,9 @@ public class LoadingScreen extends AbstractScreen {
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        if (Assets.getInstance().getAssetManager().update()) {
-            Assets.getInstance().makeLinks();
-            ScreenManager.getInstance().goToTarget();
+        if (Assets.getInstance().getAssetManager().update()) {  // если загрузка ресурсов окончена
+            Assets.getInstance().makeLinks();                   // делаем ссылку на атлас
+            ScreenManager.getInstance().goToTarget();           // и переключаем экран
         }
         batch.begin();
         batch.draw(loadingTexture,450,350);

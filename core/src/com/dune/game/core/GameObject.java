@@ -1,6 +1,5 @@
 package com.dune.game.core;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 
 public abstract class GameObject {
@@ -10,8 +9,8 @@ public abstract class GameObject {
 
     public GameObject(GameController gameController) {
         this.gameController = gameController;
-        this.position = new Vector2(0,0);
-        this.tmpV = new Vector2(0,0);
+        this.position = new Vector2();
+        this.tmpV = new Vector2();
     }
 
     public int getCellX(){

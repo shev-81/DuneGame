@@ -5,8 +5,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
-public class Tank extends GameObject implements Poolable {
-
+public abstract class AbstractUnit extends GameObject implements Poolable{
     public enum Owner {
         PLAYER, AI
     }
@@ -30,7 +29,7 @@ public class Tank extends GameObject implements Poolable {
     private float hpMax = 100;
     private Tank target;
 
-    public Tank(GameController gameController) {
+    public AbstractUnit(GameController gameController) {
         super(gameController);
         this.progressBarTextures = Assets.getInstance().getAtlas().findRegion("progressbar");
         this.borderline = Assets.getInstance().getAtlas().findRegion("borderline");
@@ -214,16 +213,6 @@ public class Tank extends GameObject implements Poolable {
             }
         }
     }
-
-    // метод определяет параметры для снаряда который будет выпущен следующим
-//    public void shoot() {
-//        tmpV.set(1, 0);
-//        tmpV.rotate(angle);
-//        tmpV.scl(20);
-//        tmpV.add(position);
-//        gameController.getProjectesController().setup(angle, tmpV, getWeapon().getPower());
-//
-//    }
 
     //анимация танка
     private TextureRegion getCurrentFrame() {

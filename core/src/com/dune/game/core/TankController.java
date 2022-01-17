@@ -17,7 +17,6 @@ public class TankController extends ObjectPool<Tank>{
         this.mouse = new Vector2();
     }
 
-
     public void render (SpriteBatch batch){
         for(int i = 0; i<activeList.size(); i++){
             activeList.get(i).render(batch);
@@ -47,7 +46,6 @@ public class TankController extends ObjectPool<Tank>{
                     if (tank.getWeapon().getType() == Weapon.Type.GROUND) {
                         aiTank = getNearestAiTank(tmpV);
                         if(aiTank == null){
-                            tank.setTarget(null);
                             tank.commandMoveTo(tmpV);
                         }else{
                             tank.commandAttack(aiTank);
