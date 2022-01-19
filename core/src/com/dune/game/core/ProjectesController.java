@@ -3,6 +3,7 @@ package com.dune.game.core;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.dune.game.core.units.AbstractUnit;
 
 public class ProjectesController extends ObjectPool<Bullet>{
 
@@ -28,9 +29,9 @@ public class ProjectesController extends ObjectPool<Bullet>{
         checkPool();
     }
 
-    public void setup(Tank tank){
+    public void setup(AbstractUnit unit){
         Bullet bullet = getActiveElement();
-        bullet.setup(tank, sphereTexture);
+        bullet.setup(unit, sphereTexture);
         bullet.setActive(true);
     }
 

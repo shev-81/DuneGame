@@ -19,7 +19,7 @@ public class WorldRender {
         ScreenUtils.clear(0.1f, 0.1f, 0.1f, 1);
         batch.begin();
         gameController.getBattleMap().render(batch);        // отрисовка карты
-        gameController.getTankController().render(batch);             // отрисовка танков
+        gameController.getUnitsController().render(batch);             // отрисовка танков
         gameController.getProjectesController().render(batch);
         font12.draw(batch,"Dune game", 1, 680, 1280,1,false);
         batch.end();
