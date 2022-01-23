@@ -96,6 +96,10 @@ public class ScreenManager {
         }
     }
 
+    public SpriteBatch getBatch() {
+        return batch;
+    }
+
     public void goToTarget() {
         game.setScreen(targetScreen);
     }

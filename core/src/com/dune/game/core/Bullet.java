@@ -1,5 +1,4 @@
 package com.dune.game.core;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -18,24 +17,31 @@ public class Bullet extends GameObject implements Poolable{
     private float speed = 500.0f;
     private boolean active = false;
     private int damage;
+    private Vector2 velocity;
 
 
     public Bullet(GameController gameController) {
         super(gameController);
+        this.velocity = new Vector2();
         timePerFrame = 0.07f; // время на показ 1 региона рисунка из анимации (иначе скорость анимации)
     }
 
     public void render(SpriteBatch batch) {
-        batch.draw(getCurrentFrame(), position.x-8, position.y-8, 8, 8, 16, 16, 2, 2, angle);
+        //batch.draw(getCurrentFrame(), position.x-8, position.y-8, 8, 8, 16, 16, 2, 2, angle);
     }
 
     public void update(float dt) {
-        this.position.add(speed * MathUtils.cosDeg(angle) * dt, speed * MathUtils.sinDeg(angle) * dt);
+        position.mulAdd(velocity, dt);              //this.position.add(speed * MathUtils.cosDeg(angle) * dt, speed * MathUtils.sinDeg(angle) * dt);
+        for (int i = 0; i < 3; i++) {               // выстрелы анимация снарядов
+            gameController.getParticleController().setup(position.x, position.y, MathUtils.random(-30.0f, 30.0f), MathUtils.random(-30.0f, 30.0f), 0.03f,
+                    1.2f, 2f, 1, 1, 0, 1, 0.1f, 0, 0, 0.5f);
+        }
         moveTimer += dt;          // таймер для анимации
         chekCollisionBorderScreen();
     }
 
-    private TextureRegion getCurrentFrame() {  // анимация снаряда
+    // анимация снаряда
+    private TextureRegion getCurrentFrame() {
         int frameIndex = (int) (moveTimer / timePerFrame) % sphereTextures.length;
         return sphereTextures[frameIndex];
     }
@@ -47,6 +53,7 @@ public class Bullet extends GameObject implements Poolable{
         this.position.set(owner.getPosition());
         this.angle=owner.getWeapon().getAngle();
         this.damage = owner.getWeapon().getPower();
+        this.velocity.set(speed * MathUtils.cosDeg(angle), speed * MathUtils.sinDeg(angle));
     }
 
     public int getDamage() {
@@ -69,16 +76,20 @@ public class Bullet extends GameObject implements Poolable{
         return owner;
     }
 
+    public Vector2 getVelocity() {
+        return velocity;
+    }
+
     @Override
     public boolean isActive() {
         return active;
     }
 
     public void chekCollisionBorderScreen () {
-        if ((int) position.y > Gdx.graphics.getHeight() || (int) position.y < 0) {
+        if ((int) position.y > BattleMap.MAP_HEIGHT_PX || (int) position.y < 0) {
             active = false;
         }
-        if ((int) position.x > Gdx.graphics.getWidth() || (int) position.x < 0) {
+        if ((int) position.x > BattleMap.MAP_WIDTH_PX || (int) position.x < 0) {
             active = false;
         }
     }

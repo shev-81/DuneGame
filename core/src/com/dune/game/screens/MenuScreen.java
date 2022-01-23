@@ -67,7 +67,7 @@ public class MenuScreen extends AbstractScreen {
                 ScreenManager.getInstance().changeScreen(ScreenManager.ScreenType.GAME);
             }
             if(mouse.x > 1280/2-75 && mouse.x < 1280/2+75 && mouse.y > 240 && mouse.y < 300){
-                System.exit(0);
+                Gdx.app.exit();
             }
         }
     }

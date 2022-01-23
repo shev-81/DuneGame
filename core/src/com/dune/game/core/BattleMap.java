@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.dune.game.core.units.BattleTank;
 import com.dune.game.core.units.Harvester;
 import com.dune.game.screens.ScreenManager;
 
@@ -22,9 +21,12 @@ public class BattleMap extends GameObject{
     private Vector2 startSelection;
     private Vector2 endSelection;
     private Vector2 mouse;
-    public static final int COLUMNS_COUNT = 16;
-    public static final int ROWS_COUNT = 9;
+    public static final int COLUMNS_COUNT = 20;
+    public static final int ROWS_COUNT = 12;
     public static final int CELL_SIZE = 80;
+    public static final int MAP_WIDTH_PX = COLUMNS_COUNT * CELL_SIZE;
+    public static final int MAP_HEIGHT_PX = ROWS_COUNT * CELL_SIZE;
+
 
     private class Cell{
         private int cellX, cellY;
@@ -100,6 +102,30 @@ public class BattleMap extends GameObject{
         return cells[cx][cy].resource;
     }
 
+    //метод возвращает позицию ближайшего месторождения спайса для харвестора
+    public Vector2 resourcePosition(Harvester harvester){
+        int x = -1;
+        int y = -1;
+        for (int i = 0; i < COLUMNS_COUNT; i++) {
+            for (int j = 0; j < ROWS_COUNT; j++) {
+                if(cells[i][j].resource > 0){
+                    if(x == -1 && y == -1){
+                        x = i;
+                        y = j;
+                    }else{
+                        if(harvester.position.dst(i*CELL_SIZE,j*CELL_SIZE) <
+                           harvester.position.dst(x*CELL_SIZE,y*CELL_SIZE)){
+                            x = i;
+                            y = j;
+                        }
+                    }
+                }
+            }
+        }
+        tmpV.set(x*CELL_SIZE+CELL_SIZE/2, y*CELL_SIZE+CELL_SIZE/2);
+        return tmpV;
+    }
+
     // сбор ресурсов на позиции танка на позиции ресурса на карте
     public int harvestResource(Vector2 point, int power){
         int cx = (int)point.x / CELL_SIZE;
@@ -124,33 +150,11 @@ public class BattleMap extends GameObject{
                 cells[i][j].render(batch);
             }
         }
-        if(Gdx.input.isButtonPressed (Input.Buttons.RIGHT)){
-            batch.draw(getCurrentFrame(clickmouseTextures), mouse.x-12, mouse.y-12, 12, 12,24,24, 1.2f, 1.2f,0);
-        }
-        // отрисовка рамки выделения обласи захвата мышкой
-        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-            endSelection.set(mouse); // Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY()
-            startSelection.set(gameController.getStartSelection());
-            for (int i = 1; i < Math.abs(endSelection.x - startSelection.x); i++) {
-                if (endSelection.x < startSelection.x) {
-                    batch.draw(choiceTexture, startSelection.x - i, endSelection.y, 2, 2);    // верх
-                    batch.draw(choiceTexture, startSelection.x - i, startSelection.y, 2, 2);  // низ
-                } else {
-                    batch.draw(choiceTexture, startSelection.x + i, endSelection.y, 2, 2);    // верх
-                    batch.draw(choiceTexture, startSelection.x + i, startSelection.y, 2, 2);  // низ
-                }
-            }
-            for (int i = 1; i < Math.abs(endSelection.y - startSelection.y); i++) {
-                if (endSelection.y < startSelection.y) {
-                    batch.draw(choiceTexture, startSelection.x, startSelection.y - i, 2, 2);  // лево
-                    batch.draw(choiceTexture, endSelection.x, startSelection.y - i, 2, 2);    // право
-                } else {
-                    batch.draw(choiceTexture, startSelection.x, startSelection.y + i, 2, 2);  // лево
-                    batch.draw(choiceTexture, endSelection.x, startSelection.y + i, 2, 2);    // право
-                }
-            }
+        if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
+            batch.draw(getCurrentFrame(clickmouseTextures), mouse.x - 12, mouse.y - 12, 12, 12, 24, 24, 1.2f, 1.2f, 0);
         }
     }
+
 
     // метод выдающий по порядку скрины анимации
     private TextureRegion getCurrentFrame(TextureRegion [] textureRegions) {
@@ -167,6 +171,13 @@ public class BattleMap extends GameObject{
                 cells[i][j].upDate(dt);
             }
         }
+    }
 
+    public Vector2 getStartSelection() {
+        return startSelection;
+    }
+
+    public Vector2 getEndSelection() {
+        return endSelection;
     }
 }

@@ -2,6 +2,7 @@ package com.dune.game.core.units;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.dune.game.core.*;
 
@@ -39,6 +40,7 @@ public abstract class AbstractUnit extends GameObject implements Poolable, Targe
         this.borderline = Assets.getInstance().getAtlas().findRegion("borderline");
         this.timePerFrame = 0.08f;
         this.rotationSpeed = 180.0f;
+        this.container = 0;
     }
 
     public abstract void setup(Owner owner, float x, float y);
@@ -81,6 +83,13 @@ public abstract class AbstractUnit extends GameObject implements Poolable, Targe
             float angleTo = tmpV.set(destination).sub(position).angle();
             angle = rotateTo(angle, angleTo, rotationSpeed, dt);
             moveTimer += dt;
+            //анимация проезда по ресурсам
+            if (gameController.getBattleMap().getResourceCount(position) > 0) {
+                for (int i = 0; i < gameController.getBattleMap().getResourceCount(position); i++) {
+                    gameController.getParticleController().setup(MathUtils.random(getCellX() * 80, getCellX() * 80 + 80), MathUtils.random(getCellY() * 80, getCellY() * 80 + 80), MathUtils.random(-20, 20), MathUtils.random(-20, 20), 0.3f, 0.5f, 0.4f,
+                            0, 0, 1, 0.1f, 1, 1, 1, 0.4f);
+                }
+            }
             tmpV.set(speed, 0).rotate(angle);    // определение направления
             position.mulAdd(tmpV, dt);          // изменения метоположения в зависимости от dt
             if (position.dst(destination) < 120.0f && Math.abs(angleTo - angle) > 10) {     // исключение зацикливаний при повороте
@@ -150,17 +159,17 @@ public abstract class AbstractUnit extends GameObject implements Poolable, Targe
     //блок выезда за границы игрового окна
     public void chekCollision(float dt) {
         // сталкивается ли танк с краем экрана
-        if ((int) position.y > 680) {
-            position.y = 680;
+        if (position.x < 40) {
+            position.x = 40;
         }
-        if ((int) position.y < 40) {
+        if (position.y < 40) {
             position.y = 40;
         }
-        if ((int) position.x > 1240) {
-            position.x = 1240;
+        if (position.x > BattleMap.MAP_WIDTH_PX - 40) {
+            position.x = BattleMap.MAP_WIDTH_PX - 40;
         }
-        if ((int) position.x < 40) {
-            position.x = 40;
+        if (position.y > BattleMap.MAP_HEIGHT_PX - 40) {
+            position.y = BattleMap.MAP_HEIGHT_PX - 40;
         }
     }
 
@@ -195,6 +204,10 @@ public abstract class AbstractUnit extends GameObject implements Poolable, Targe
         return hp<0;
     }
 
+    public float getHpMax() {
+        return hpMax;
+    }
+
     public TextureRegion getBorderline() {
         return borderline;
     }
@@ -210,5 +223,13 @@ public abstract class AbstractUnit extends GameObject implements Poolable, Targe
     @Override
     public boolean isActive() {
         return hp > 0;
+    }
+
+    public int getContainer() {
+        return container;
+    }
+
+    public void setContainer(int container) {
+        this.container = container;
     }
 }

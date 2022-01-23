@@ -50,8 +50,9 @@ public class BattleTank extends AbstractUnit {
                 gameController.getProjectesController().setup(this);
             }
         }
-        if(target == null){
-            weapon.setAngle(rotateTo(weapon.getAngle(), angle, 180.0f, dt));
+        if (target == null) {
+            float angleTo = tmpV.set(destination).sub(position).nor().angle(); // tmpV.set(destination).sub(position).angle();
+            weapon.setAngle(rotateTo(weapon.getAngle(), angleTo, 180.0f, dt));
         }
     }
 

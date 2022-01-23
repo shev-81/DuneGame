@@ -2,13 +2,20 @@ package com.dune.game.core;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.math.MathUtils;
 import com.dune.game.core.units.AbstractUnit;
 import com.dune.game.core.units.UnitType;
+
+import static com.dune.game.core.Owner.AI;
+import static com.dune.game.core.Owner.PLAYER;
 
 
 public class PlayerLogic {
 
     private GameController gameController;
+    private int money;
+    private int unitsCount;
+    private int unitsMaxCount;
 
     public PlayerLogic(GameController gameController) {
         this.gameController = gameController;
@@ -19,9 +26,12 @@ public class PlayerLogic {
             for(AbstractUnit unit: gameController.getSelectedUnits()) {
                 if(unit.getOwnerType() == Owner.PLAYER){
                     unitProcessing(unit);
-
                 }
             }
+        }
+        if(money>=10){    //  если денег хватает на боевой танк то создаем
+            gameController.getUnitsController().createBattleTank(MathUtils.random(50, 1100), MathUtils.random(50, 650), PLAYER);
+            money = money - 10;
         }
     }
 
@@ -38,5 +48,25 @@ public class PlayerLogic {
                 unit.commandAttack(aiUnit);
             }
         }
+    }
+    public int getMoney() {
+        return money;
+    }
+
+    public int getUnitsCount() {
+        unitsCount = 0;
+        for(AbstractUnit unit: gameController.getUnitsController().getPlayerUnits()){
+            unitsCount++;
+        }
+        return unitsCount;
+    }
+
+    public void setMoney(int money) {
+        this.money = this.money + money;
+    }
+
+
+    public int getUnitsMaxCount() {
+        return unitsMaxCount;
     }
 }

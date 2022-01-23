@@ -6,7 +6,6 @@ import com.dune.game.core.*;
 
 public class Harvester extends AbstractUnit {
 
-
     public Harvester(GameController gameController) {
         super(gameController);
         this.weaponsTextures = Assets.getInstance().getAtlas().findRegion("harvester");
@@ -62,7 +61,7 @@ public class Harvester extends AbstractUnit {
 
         if (gameController.getBattleMap().getResourceCount(position) > 0) {
             int result = weapon.use(dt);
-            if (result > -1 && container <= CONTAINER_CAPACITY) {
+            if (result > -1 && container < CONTAINER_CAPACITY) {
                 container += gameController.getBattleMap().harvestResource(position, result); // наполняем контейнер
             }
         } else {
@@ -70,6 +69,14 @@ public class Harvester extends AbstractUnit {
         }
     }
 
+    @Override
+    public boolean takeDamage(int damage) {
+        if(!isActive()){
+            return false;
+        }
+        this.hp -= damage*(container+1);    // урон по наполненому харвестеру увеличивается в зависимости от наполнения его емкости
+        return hp<0;
+    }
     public Vector2 getPosition() {
         return position;
     }
@@ -81,6 +88,10 @@ public class Harvester extends AbstractUnit {
     @Override
     public void commandAttack(Targetable target) {
         commandMoveTo(target.getPosition());
+    }
+
+    public boolean isFullContainer(){
+        return container >= CONTAINER_CAPACITY;
     }
 
     public float getHp() {
