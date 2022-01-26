@@ -5,6 +5,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.dune.game.core.*;
+import com.dune.game.core.interfaces.Poolable;
+import com.dune.game.core.interfaces.Targetable;
 
 public abstract class AbstractUnit extends GameObject implements Poolable, Targetable {
 
@@ -19,10 +21,12 @@ public abstract class AbstractUnit extends GameObject implements Poolable, Targe
     protected TextureRegion progressBarTextures;
     protected TextureRegion borderline;
     protected Vector2 destination;
+    protected Vector2 dustV1;
+    protected Vector2 dustV2;
 
     protected int container;
-    public static final int CONTAINER_POINT = 10;
-    public static final int CONTAINER_CAPACITY = 50;
+    public static final int CONTAINER_POINT = 1;
+    public static final int CONTAINER_CAPACITY = 5;
 
     protected float angle;
     protected float speed;
@@ -31,7 +35,7 @@ public abstract class AbstractUnit extends GameObject implements Poolable, Targe
     protected float rotationSpeed;
 
     protected float hp;
-    protected float hpMax = 100;
+    protected float hpMax = 50;
     protected float minDstToActiveTarget;
 
     public AbstractUnit(GameController gameController) {
@@ -41,6 +45,8 @@ public abstract class AbstractUnit extends GameObject implements Poolable, Targe
         this.timePerFrame = 0.08f;
         this.rotationSpeed = 180.0f;
         this.container = 0;
+        this.dustV1 = new Vector2();
+        this.dustV2 = new Vector2();
     }
 
     public abstract void setup(Owner owner, float x, float y);
@@ -83,6 +89,22 @@ public abstract class AbstractUnit extends GameObject implements Poolable, Targe
             float angleTo = tmpV.set(destination).sub(position).angle();
             angle = rotateTo(angle, angleTo, rotationSpeed, dt);
             moveTimer += dt;
+            for (int i = 0; i < 2; i++) {               // пылевой шлейф при движении
+                dustV1.set(1,0);
+                dustV2.set(1,0);
+                dustV1.rotate(angle-25);                // определение 1 точки от куда  будет идти пыль
+                dustV2.rotate(angle+25);                // определение 2 точки от куда  будет идти пыль
+                dustV1.scl(-30);
+                dustV2.scl(-30);
+                dustV1.add(position);
+                dustV2.add(position);
+                // левая гусеница
+                gameController.getParticleController().setup(dustV1.x, dustV1.y, MathUtils.random(-100.0f, 100.0f), MathUtils.random(-10.0f, 10.0f), 0.2f,
+                        3f, 0.3f, 0.2f, 0.2f, 0.2f, 0.1f, 0.1f, 0.1f, 0.1f, 0.5f);
+                // правая гусеница
+                gameController.getParticleController().setup(dustV2.x, dustV2.y, MathUtils.random(-100.0f, 100.0f), MathUtils.random(-10.0f, 10.0f), 0.2f,
+                        3f, 0.3f, 0.2f, 0.2f, 0.2f, 0.1f, 0.1f, 0.1f, 0.1f, 0.5f);
+            }
             //анимация проезда по ресурсам
             if (gameController.getBattleMap().getResourceCount(position) > 0) {
                 for (int i = 0; i < gameController.getBattleMap().getResourceCount(position); i++) {
@@ -126,7 +148,7 @@ public abstract class AbstractUnit extends GameObject implements Poolable, Targe
     // находимся у точки назначения
     public void moveBy(Vector2 value) {
         boolean stayStill = false;
-        if (Math.abs(position.dst(destination)) < 25.0f) {
+        if (Math.abs(position.dst(destination)) < 35.0f) {
             stayStill = true;
         }
         position.add(value);
@@ -222,6 +244,9 @@ public abstract class AbstractUnit extends GameObject implements Poolable, Targe
 
     @Override
     public boolean isActive() {
+        if(gameController.isUnitSelected(this) && hp <= 0){
+            gameController.getSelectedUnits().remove(this);
+        }
         return hp > 0;
     }
 

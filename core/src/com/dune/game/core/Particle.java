@@ -1,6 +1,7 @@
 package com.dune.game.core;
 
 import com.badlogic.gdx.math.Vector2;
+import com.dune.game.core.interfaces.Poolable;
 
 public class Particle implements Poolable {
     private Vector2 position;

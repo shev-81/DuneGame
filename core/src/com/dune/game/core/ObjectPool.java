@@ -1,5 +1,7 @@
 package com.dune.game.core;
 
+import com.dune.game.core.interfaces.Poolable;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +26,7 @@ public abstract class ObjectPool  <T extends Poolable> {
     }
 
     public ObjectPool(GameController gameController) {
-        this.initialCapacity = 10;  //  размер пула объектов
+        this.initialCapacity = 10;  // начальный размер пула объектов
         this.gameController = gameController;
         this.activeList = new ArrayList<>(initialCapacity);
         this.freeList = new ArrayList<>(initialCapacity);

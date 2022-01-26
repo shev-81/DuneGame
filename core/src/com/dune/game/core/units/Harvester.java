@@ -1,10 +1,15 @@
 package com.dune.game.core.units;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.dune.game.core.*;
+import com.dune.game.core.interfaces.Targetable;
 
 public class Harvester extends AbstractUnit {
+        private Vector2 targetPointHarvest;
+        private boolean harvesterWorking;
+        private float rotateAngle;
 
     public Harvester(GameController gameController) {
         super(gameController);
@@ -16,6 +21,8 @@ public class Harvester extends AbstractUnit {
         this.hpMax = 500;
         this.container = 0; // емкость ресурсов
         this.unitType = UnitType.HARVESTER;
+        this.targetPointHarvest = new Vector2();
+        this.harvesterWorking = false;
     }
 
     @Override
@@ -29,7 +36,7 @@ public class Harvester extends AbstractUnit {
     @Override
     public void renderGui(SpriteBatch batch) {
         // если активен сбор ресурса отрисовка прогресса тика сбора
-        if(container <= CONTAINER_CAPACITY){
+        if(container < CONTAINER_CAPACITY){
             if (weapon.getWeaponPercentage() > 0.0f) {
                 batch.setColor(0.2f, 0.0f, 0.0f, 1.0f);
                 batch.draw(progressBarTextures, position.x - 32, position.y + 43, 64, 8);
@@ -54,13 +61,22 @@ public class Harvester extends AbstractUnit {
 
     // перезарядка оружия танка
     public void updateWeapon(float dt) {
+        rotateAngle = rotateAngle + dt;
         if (target == null) {
             float angleTo = tmpV.set(destination).sub(position).angle(); // tmpV.set(destination).sub(position).angle();
             weapon.setAngle(rotateTo(weapon.getAngle(), angleTo, 180.0f, dt));
         }
 
-        if (gameController.getBattleMap().getResourceCount(position) > 0) {
+        if (gameController.getBattleMap().getResourceCount(position) > 0 && container<CONTAINER_CAPACITY) {
             int result = weapon.use(dt);
+            for (int i = 0; i < 3; i++) {               // Эффект сбора харвестером ресурса
+                tmpV.set(1,0);
+                tmpV.rotate(angle);                     // определение 2 точки от куда  будет идти пыль
+                tmpV.scl(20);
+                tmpV.add(position);
+                gameController.getParticleController().setup(tmpV.x, tmpV.y, MathUtils.random(-80.0f, 80.0f), MathUtils.random(-80.0f, 80.0f), 0.3f,
+                        1f, 0.5f, 0f, 0.5f, 1f, 1f, 0.1f, 0.1f, 0.1f, 0.5f);
+            }
             if (result > -1 && container < CONTAINER_CAPACITY) {
                 container += gameController.getBattleMap().harvestResource(position, result); // наполняем контейнер
             }
@@ -88,6 +104,22 @@ public class Harvester extends AbstractUnit {
     @Override
     public void commandAttack(Targetable target) {
         commandMoveTo(target.getPosition());
+    }
+
+    public void setTargetPointHarvest(Vector2 targetPointHarvest) {
+        this.targetPointHarvest = targetPointHarvest;
+    }
+
+    public void setHarvesterWorking(boolean harvesterWorking) {
+        this.harvesterWorking = harvesterWorking;
+    }
+
+    public boolean isHarvesterWorking() {
+        return harvesterWorking;
+    }
+
+    public Vector2 getTargetPointHarvest() {
+        return targetPointHarvest;
     }
 
     public boolean isFullContainer(){

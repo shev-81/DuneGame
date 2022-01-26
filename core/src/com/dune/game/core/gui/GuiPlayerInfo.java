@@ -5,7 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.StringBuilder;
-import com.dune.game.core.PlayerLogic;
+import com.dune.game.core.logic.PlayerLogic;
 
 public class GuiPlayerInfo extends Group {
     private PlayerLogic playerLogic;

@@ -5,8 +5,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.dune.game.core.Assets;
 import com.dune.game.core.GameController;
-import com.dune.game.core.Owner;
-import com.dune.game.core.Targetable;
+import com.dune.game.core.interfaces.Targetable;
 
 public class Building extends AbstractUnit{
     protected TextureRegion buildingTextures;
@@ -34,12 +33,12 @@ public class Building extends AbstractUnit{
         }
         switch (ownerType) {
             case PLAYER:
-                batch.setColor(0.0f, 0.5f, 0.0f, 1.0f);
+                batch.setColor(0.0f, 1f, 0.0f, 0.7f);
                 batch.draw(buildingTextures, position.x - 70, position.y - 70);
                 batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
                 break;
             case AI:
-                batch.setColor(1.0f, 0.5f, 0.0f, 1.0f);
+                batch.setColor(1f, 0.0f, 0.0f, 0.7f);
                 batch.draw(buildingTextures, position.x - 70, position.y - 70);
                 batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
                 break;

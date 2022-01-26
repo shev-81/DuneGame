@@ -3,9 +3,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.dune.game.core.interfaces.Poolable;
 import com.dune.game.core.units.AbstractUnit;
+import com.dune.game.core.units.Owner;
 
-public class Bullet extends GameObject implements Poolable{
+public class Bullet extends GameObject implements Poolable {
 
     private AbstractUnit owner;
     private Owner ownerType;
@@ -33,8 +35,12 @@ public class Bullet extends GameObject implements Poolable{
     public void update(float dt) {
         position.mulAdd(velocity, dt);              //this.position.add(speed * MathUtils.cosDeg(angle) * dt, speed * MathUtils.sinDeg(angle) * dt);
         for (int i = 0; i < 3; i++) {               // выстрелы анимация снарядов
-            gameController.getParticleController().setup(position.x, position.y, MathUtils.random(-30.0f, 30.0f), MathUtils.random(-30.0f, 30.0f), 0.03f,
-                    1.2f, 2f, 1, 1, 0, 1, 0.1f, 0, 0, 0.5f);
+            tmpV.set(1,0);                          // определение точки дула оружия от куда  будет выпущен снаряд
+            tmpV.rotate(angle);
+            tmpV.scl(20);
+            tmpV.add(position);
+            gameController.getParticleController().setup(tmpV.x, tmpV.y, MathUtils.random(-30.0f, 30.0f), MathUtils.random(-30.0f, 30.0f), 0.06f,
+                    2f, 1f, 1, 1, 0, 1, 0.1f, 0, 0, 0.5f);
         }
         moveTimer += dt;          // таймер для анимации
         chekCollisionBorderScreen();

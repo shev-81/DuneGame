@@ -3,6 +3,7 @@ package com.dune.game.core.units;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.dune.game.core.*;
+import com.dune.game.core.interfaces.Targetable;
 
 public class BattleTank extends AbstractUnit {
 
@@ -12,7 +13,7 @@ public class BattleTank extends AbstractUnit {
         this.weaponsTextures = Assets.getInstance().getAtlas().findRegion("turret");
         this.tankTextures = Assets.getInstance().getAtlas().findRegion("tankcore").split(64, 64)[0];
         this.minDstToActiveTarget = 240.0f;
-        this.weapon = new Weapon( 1.5f, 1);
+        this.weapon = new Weapon( 1.5f, 5);
         this.speed = 140.0f;
         this.hpMax = 100;
         this.container = 0; // текущая емкость контейнера

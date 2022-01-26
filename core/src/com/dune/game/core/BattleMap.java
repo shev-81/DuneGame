@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.dune.game.core.units.Harvester;
 import com.dune.game.screens.ScreenManager;
@@ -37,13 +36,15 @@ public class BattleMap extends GameObject{
         public Cell(int cellX, int cellY) {
             this.cellX = cellX;
             this.cellY = cellY;
-            resourceRegenerate = MathUtils.random(5.0f)-4.5f;
-            if(resourceRegenerate<0.0f){
-                resourceRegenerate = 0.0f;
-            }else{
+            // позиция генерации ресурсов у баз игроков
+            if((this.cellX >= 1 && this.cellX <=3 && this.cellY >= 4 && this.cellY <= 5) ||
+               (this.cellX <= COLUMNS_COUNT - 1 && this.cellX >= COLUMNS_COUNT - 3 && this.cellY <= ROWS_COUNT - 4 && this.cellY >= ROWS_COUNT - 5)){
+                resourceRegenerate = 0.5f;    //MathUtils.random(5.0f)-4.5f;
+                resourceRegenerate *= 50.0f;  // скорость регенерации ресурса на карте
                 resource = 1;
-                resourceRegenerate *= 150.0f;  // скорость регенерации ресурса на карте
-                resourceRegenerate += 10.0f;
+            }else{
+                resourceRegenerate = 0;
+                resource = 0;
             }
         }
 
@@ -74,7 +75,7 @@ public class BattleMap extends GameObject{
 
     public BattleMap (GameController gameController){
         super(gameController);
-        this.grassTexture = Assets.getInstance().getAtlas().findRegion("grass");
+        this.grassTexture = Assets.getInstance().getAtlas().findRegion("grass2");
         this.choiceTexture = Assets.getInstance().getAtlas().findRegion("choiceline");
         this.spicesTextures = new TextureRegion(Assets.getInstance().getAtlas().findRegion("spices")).split(80, 80)[0];
         this.clickmouseTextures = new TextureRegion(Assets.getInstance().getAtlas().findRegion("clickmouse")).split(24, 24)[0];
@@ -99,11 +100,14 @@ public class BattleMap extends GameObject{
     public int getResourceCount(Vector2 point){
         int cx = (int)point.x / CELL_SIZE;
         int cy = (int)point.y / CELL_SIZE;
-        return cells[cx][cy].resource;
+        try{
+            return cells[cx][cy].resource;
+        }catch(ArrayIndexOutOfBoundsException e){}
+        return 0;
     }
 
     //метод возвращает позицию ближайшего месторождения спайса для харвестора
-    public Vector2 resourcePosition(Harvester harvester){
+    public Vector2 getResourceNearestPosition(Vector2 hPos){
         int x = -1;
         int y = -1;
         for (int i = 0; i < COLUMNS_COUNT; i++) {
@@ -113,14 +117,16 @@ public class BattleMap extends GameObject{
                         x = i;
                         y = j;
                     }else{
-                        if(harvester.position.dst(i*CELL_SIZE,j*CELL_SIZE) <
-                           harvester.position.dst(x*CELL_SIZE,y*CELL_SIZE)){
+                        if(hPos.dst(i*CELL_SIZE,j*CELL_SIZE) < hPos.dst(x*CELL_SIZE,y*CELL_SIZE)){
                             x = i;
                             y = j;
                         }
                     }
                 }
             }
+        }
+        if( x == -1 || y == -1){
+            return hPos;
         }
         tmpV.set(x*CELL_SIZE+CELL_SIZE/2, y*CELL_SIZE+CELL_SIZE/2);
         return tmpV;

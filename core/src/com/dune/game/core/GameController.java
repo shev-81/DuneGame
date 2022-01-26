@@ -1,6 +1,7 @@
 package com.dune.game.core;
 
 import com.badlogic.gdx.*;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
@@ -12,8 +13,15 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.dune.game.core.controllers.Collider;
+import com.dune.game.core.controllers.ParticleController;
+import com.dune.game.core.controllers.ProjectesController;
+import com.dune.game.core.controllers.UnitsController;
 import com.dune.game.core.gui.GuiPlayerInfo;
+import com.dune.game.core.logic.AiLogic;
+import com.dune.game.core.logic.PlayerLogic;
 import com.dune.game.core.units.AbstractUnit;
+import com.dune.game.core.units.Owner;
 import com.dune.game.screens.ScreenManager;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +31,8 @@ public class GameController {
     private static final float CAMERA_SPEED = 240.0f;
     private GuiPlayerInfo guiPlayerInfo;
     private BattleMap battleMap;
-    private Vector2 tmpV;
+    private boolean paused;
+    private float worldTimer;
     private ProjectesController projectesController;
     private UnitsController unitsController;
     private ParticleController particleController;
@@ -35,7 +44,10 @@ public class GameController {
     private Vector2 endSelection;
     private Vector2 mouse;
     private Vector2 pointOfView;
+    private Vector2 tmpV;
+    private TextButton testBtn;
     private Stage stage;
+    private Music music;
 
     // инициализация игровой логики
     public GameController() {
@@ -52,30 +64,43 @@ public class GameController {
         this.endSelection = new Vector2();
         this.mouse = new Vector2();
         this.pointOfView = new Vector2(ScreenManager.HALF_WORLD_WIDTH, ScreenManager.HALF_WORLD_HEIGHT);
+        this.music = Gdx.audio.newMusic(Gdx.files.internal("music/menu_music.mp3"));
+        this.music.setVolume(0.08f);
+        this.music.setLooping(true);
+        this.music.play();
+
         createGuiAndPrepareGameInput();
     }
 
     // апдейт всех созданных объектов
     public void update(float dt) {
-        ScreenManager.getInstance().pointCameraTo(getPointOfView());  // выравнивание координат сцена под обзор экрана мира
-        mouse.set(Gdx.input.getX(), Gdx.input.getY());              // привязка координат курсора мыши к окну в игре
-        ScreenManager.getInstance().getViewport().unproject(mouse);
-        unitsController.update(dt);
-        playerLogic.update(dt);
-        aiLogic.update(dt);
-        projectesController.update(dt);
-        battleMap.update(dt);
-        collider.checkCollisions();
-        particleController.update(dt);
+        if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+            paused = !paused;
+        }
+        if (!paused) {
+            worldTimer += dt;
+            ScreenManager.getInstance().pointCameraTo(getPointOfView());  // выравнивание координат сцена под обзор экрана мира
+            mouse.set(Gdx.input.getX(), Gdx.input.getY());                // привязка координат курсора мыши к окну в игре
+            ScreenManager.getInstance().getViewport().unproject(mouse);
+            battleMap.update(dt);
+            unitsController.update(dt);
+            playerLogic.update(dt);
+            aiLogic.update(dt);
+            projectesController.update(dt);
+            //battleMap.update(dt);
+            collider.checkCollisions();
+            particleController.update(dt);
 
 //        for (int i = 0; i < 5; i++) {   //  горящий курсор мыши
 //            particleController.setup(mouse.x, mouse.y, MathUtils.random(-15.0f, 15.0f), MathUtils.random(-30.0f, 30.0f), 0.5f,
 //                    0.3f, 1.4f, 1, 1, 0, 1, 1, 0, 0, 0.5f);
 //        }
-        guiPlayerInfo.update(dt);
-        ScreenManager.getInstance().resetCamera();
-        stage.act(dt);
-        changePOV(dt);
+        }
+            guiPlayerInfo.update(dt);
+            ScreenManager.getInstance().resetCamera();
+            stage.act(dt);
+            changePOV(dt);
+
     }
 
     // метод выделения юнитов на карте
@@ -148,21 +173,23 @@ public class GameController {
         Image backGroundMenuImage = new Image(skin.getRegion("menuFon"));
         backGroundMenuImage.setWidth(1280);
 
-//        final TextButton testBtn = new TextButton("Test", textButtonStyle);
-//        testBtn.addListener(new ClickListener() {
-//            @Override
-//            public void clicked(InputEvent event, float x, float y) {
-//                System.out.println("Test");
-//            }
-//        });
+        // обработчик тест биттон
+        testBtn = new TextButton("Test", textButtonStyle);
+        testBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                unitsController.createHarvester(100,100, Owner.PLAYER);
+            }
+        });
 
         Group menuGroup = new Group();
         menuBtn.setPosition(0, 0);
-//        testBtn.setPosition(130, 0);
+        testBtn.setPosition(unitsController.getBasePlayer().position.x+50, unitsController.getBasePlayer().position.y+50);
         menuGroup.addActor(menuBtn);
 //        menuGroup.addActor(testBtn);
         menuGroup.setPosition(1130, 680);
-
+        getStage().addActor(testBtn);
+        testBtn.setVisible(false);
         Label.LabelStyle labelStyle = new Label.LabelStyle(font14, Color.WHITE);
         skin.add("simpleLabel", labelStyle);
 
@@ -207,30 +234,30 @@ public class GameController {
         }
     }
 
+    public float getWorldTimer() {
+        return worldTimer;
+    }
     public AiLogic getAiLogic() {
         return aiLogic;
     }
-
     public PlayerLogic getPlayerLogic() {
         return playerLogic;
     }
-
+    public boolean isPaused() {
+        return paused;
+    }
     public Vector2 getMouse() {
         return mouse;
     }
-
     public Stage getStage() {
         return stage;
     }
-
     public Vector2 getStartSelection() {
         return startSelection;
     }
-
     public List<AbstractUnit> getSelectedUnits() {
         return selectedUnits;
     }
-
     public boolean isUnitSelected(AbstractUnit abstractUnit) {
         return selectedUnits.contains(abstractUnit);
     }
@@ -249,6 +276,10 @@ public class GameController {
 
     public ParticleController getParticleController() {
         return particleController;
+    }
+
+    public TextButton getTestBtn() {
+        return testBtn;
     }
 
     public Vector2 getPointOfView() {

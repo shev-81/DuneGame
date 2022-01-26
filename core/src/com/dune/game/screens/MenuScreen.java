@@ -13,6 +13,7 @@ public class MenuScreen extends AbstractScreen {
     private TextureRegion menuOneTexture;
     private TextureRegion menuThowTexture;
     private TextureRegion menuchoiceTexture;
+    private TextureRegion startScreenTexture;
     private TextureRegion tmp1Texture;
     private TextureRegion tmp2Texture;
     private BitmapFont font24;
@@ -25,6 +26,8 @@ public class MenuScreen extends AbstractScreen {
 
     @Override
     public void show() {
+
+        this.startScreenTexture = Assets.getInstance().getAtlas().findRegion("dunestart");
         this.menuOneTexture = Assets.getInstance().getAtlas().findRegion("menu");
         this.menuThowTexture = Assets.getInstance().getAtlas().findRegion("menu");
         this.menuchoiceTexture = Assets.getInstance().getAtlas().findRegion("menuchoice");
@@ -40,10 +43,11 @@ public class MenuScreen extends AbstractScreen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
-        batch.draw(menuOneTexture, 1280/2-75, 300);
-        font24.draw(batch,"Play game", 0, 340, 1280,1,false);
-        batch.draw(menuThowTexture, 1280/2-75, 240);
-        font24.draw(batch,"Exit game", 0, 280, 1280,1,false);
+        batch.draw(startScreenTexture,250,300);
+        batch.draw(menuOneTexture, 1280/2-75, 200);
+        font24.draw(batch,"Play game", 0, 240, 1280,1,false);
+        batch.draw(menuThowTexture, 1280/2-75, 140);
+        font24.draw(batch,"Exit game", 0, 180, 1280,1,false);
         batch.end();
     }
 
@@ -52,21 +56,21 @@ public class MenuScreen extends AbstractScreen {
         ScreenManager.getInstance().getViewport().unproject(mouse);
         int x = (int)mouse.x;
         int y = (int)mouse.y;
-        if(x > 1280/2-75 && x < 1280/2+75 && y > 300 && y < 360){
+        if(x > 1280/2-75 && x < 1280/2+75 && y > 200 && y < 260){
             menuOneTexture = menuchoiceTexture;
         }else{
             menuOneTexture = tmp1Texture;
         }
-        if(x > 1280/2-75 && x < 1280/2+75 && y > 240 && y < 300){
+        if(x > 1280/2-75 && x < 1280/2+75 && y > 140 && y < 200){
             menuThowTexture = menuchoiceTexture;
         }else{
             menuThowTexture = tmp2Texture;
         }
         if (Gdx.input.justTouched()) {
-            if(mouse.x > 1280/2-75 && mouse.x < 1280/2+75 && mouse.y > 300 && mouse.y < 360){
+            if(mouse.x > 1280/2-75 && mouse.x < 1280/2+75 && mouse.y > 200 && mouse.y < 260){
                 ScreenManager.getInstance().changeScreen(ScreenManager.ScreenType.GAME);
             }
-            if(mouse.x > 1280/2-75 && mouse.x < 1280/2+75 && mouse.y > 240 && mouse.y < 300){
+            if(mouse.x > 1280/2-75 && mouse.x < 1280/2+75 && mouse.y > 140 && mouse.y < 200){
                 Gdx.app.exit();
             }
         }
