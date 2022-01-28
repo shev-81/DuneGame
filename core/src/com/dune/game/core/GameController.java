@@ -21,7 +21,9 @@ import com.dune.game.core.gui.GuiPlayerInfo;
 import com.dune.game.core.logic.AiLogic;
 import com.dune.game.core.logic.PlayerLogic;
 import com.dune.game.core.units.AbstractUnit;
+import com.dune.game.core.units.Harvester;
 import com.dune.game.core.units.Owner;
+import com.dune.game.core.units.UnitType;
 import com.dune.game.screens.ScreenManager;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,14 +38,15 @@ public class GameController {
     private ProjectesController projectesController;
     private UnitsController unitsController;
     private ParticleController particleController;
+    private PathFinder pathFinder;
     private List<AbstractUnit> selectedUnits;
     private PlayerLogic playerLogic;
     private AiLogic aiLogic;
     private Collider collider;
     private Vector2 startSelection;
-    private Vector2 endSelection;
     private Vector2 mouse;
     private Vector2 pointOfView;
+    private Vector2 pointHarvest;
     private Vector2 tmpV;
     private TextButton testBtn;
     private Stage stage;
@@ -52,6 +55,7 @@ public class GameController {
     // инициализация игровой логики
     public GameController() {
         this.battleMap = new BattleMap(this);                       // создание игровой карты
+        this.pathFinder = new PathFinder(battleMap);                            // подсистема построения маршрутов юнитов
         this.projectesController = new ProjectesController(this);   // контроллер снарядов
         this.playerLogic = new PlayerLogic(this);                   // контроллер действий пользователя
         this.aiLogic = new AiLogic(this);                           // контроллер действий CPU
@@ -61,14 +65,13 @@ public class GameController {
         this.selectedUnits = new ArrayList<>();
         this.tmpV = new Vector2();
         this.startSelection = new Vector2();
-        this.endSelection = new Vector2();
+        this.pointHarvest = new Vector2();
         this.mouse = new Vector2();
         this.pointOfView = new Vector2(ScreenManager.HALF_WORLD_WIDTH, ScreenManager.HALF_WORLD_HEIGHT);
         this.music = Gdx.audio.newMusic(Gdx.files.internal("music/menu_music.mp3"));
         this.music.setVolume(0.08f);
         this.music.setLooping(true);
         this.music.play();
-
         createGuiAndPrepareGameInput();
     }
 
@@ -87,20 +90,13 @@ public class GameController {
             playerLogic.update(dt);
             aiLogic.update(dt);
             projectesController.update(dt);
-            //battleMap.update(dt);
             collider.checkCollisions();
             particleController.update(dt);
-
-//        for (int i = 0; i < 5; i++) {   //  горящий курсор мыши
-//            particleController.setup(mouse.x, mouse.y, MathUtils.random(-15.0f, 15.0f), MathUtils.random(-30.0f, 30.0f), 0.5f,
-//                    0.3f, 1.4f, 1, 1, 0, 1, 1, 0, 0, 0.5f);
-//        }
         }
-            guiPlayerInfo.update(dt);
-            ScreenManager.getInstance().resetCamera();
-            stage.act(dt);
-            changePOV(dt);
-
+        guiPlayerInfo.update(dt);
+        ScreenManager.getInstance().resetCamera();
+        stage.act(dt);
+        changePOV(dt);
     }
 
     // метод выделения юнитов на карте
@@ -128,11 +124,23 @@ public class GameController {
                         tmpV.y = startSelection.y;
                         startSelection.y = t;
                     }
-                    selectedUnits.clear();
+                    if (selectedUnits.size() > 0) {
+                        // реакция на левый тач
+                        for (int i = 0; i < selectedUnits.size(); i++) {
+                            AbstractUnit unit = selectedUnits.get(i);
+                            if (unit.getOwnerType() == Owner.PLAYER) {
+                                unitProcessing(unit);
+                            }
+                            if (unit.getOwnerType() == Owner.PLAYER && unit.getUnitType() == UnitType.BUILDING) {
+                                getTestBtn().setVisible(true);
+                            }
+                        }
+                        selectedUnits.clear();
+                    }
                     if (Math.abs(tmpV.x - startSelection.x) > 20 & Math.abs(tmpV.y - startSelection.y) > 20) { // обработка простого клика по месту
-                        for (AbstractUnit unit: unitsController.getPlayerUnits()) {
+                        for (AbstractUnit unit : unitsController.getPlayerUnits()) {
                             if (unit.getPosition().x > startSelection.x && unit.getPosition().x < tmpV.x
-                                && unit.getPosition().y > tmpV.y && unit.getPosition().y < startSelection.y) {
+                                    && unit.getPosition().y > tmpV.y && unit.getPosition().y < startSelection.y) {
                                 selectedUnits.add(unit);
                             }
                         }
@@ -152,6 +160,28 @@ public class GameController {
         };
     }
 
+    // метод определяет действия для юнита по клику если он есть в листе выбранных
+    public void unitProcessing(AbstractUnit unit) {
+        if (unit.getUnitType() == UnitType.HARVESTER) {
+            if (getBattleMap().getResourceCount(getMouse()) > 0 && !((Harvester) unit).isHarvesterWorking()) {                    // если таргет спайс и больше 0
+                pointHarvest.set(getMouse());
+                ((Harvester) unit).setTargetPointHarvest(pointHarvest);              // устанавливаем поинт сбора
+                ((Harvester) unit).setHarvesterWorking(true);                      // и переводим харвестер в режим работает сбор
+            } else {
+                ((Harvester) unit).setHarvesterWorking(false);
+                unit.commandMoveTo(getMouse(),true);
+            }
+        }
+        if (unit.getUnitType() == UnitType.BATTLE_TANK) {
+            AbstractUnit aiUnit = getUnitsController().getNearestAiUnit(getMouse());
+            if (aiUnit == null) {
+                unit.commandMoveTo(getMouse(), true);
+            } else {
+                unit.commandAttack(aiUnit);
+            }
+        }
+    }
+
     // метод создания интерфейса в игре
     public void createGuiAndPrepareGameInput() {
         stage = new Stage(ScreenManager.getInstance().getViewport(), ScreenManager.getInstance().getBatch());
@@ -163,7 +193,7 @@ public class GameController {
                 skin.getDrawable("menu"), null, null, font14);
 
         final TextButton menuBtn = new TextButton("Menu", textButtonStyle);
-            menuBtn.addListener(new ClickListener() {
+        menuBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 ScreenManager.getInstance().changeScreen(ScreenManager.ScreenType.MENU);
@@ -174,17 +204,17 @@ public class GameController {
         backGroundMenuImage.setWidth(1280);
 
         // обработчик тест биттон
-        testBtn = new TextButton("Test", textButtonStyle);
+        testBtn = new TextButton("harvester", textButtonStyle);
         testBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                unitsController.createHarvester(100,100, Owner.PLAYER);
+                unitsController.createHarvester(100, 100, Owner.PLAYER);
             }
         });
 
         Group menuGroup = new Group();
         menuBtn.setPosition(0, 0);
-        testBtn.setPosition(unitsController.getBasePlayer().position.x+50, unitsController.getBasePlayer().position.y+50);
+        testBtn.setPosition(unitsController.getBasePlayer().position.x + 50, unitsController.getBasePlayer().position.y + 50);
         menuGroup.addActor(menuBtn);
 //        menuGroup.addActor(testBtn);
         menuGroup.setPosition(1130, 680);
@@ -195,7 +225,7 @@ public class GameController {
 
         guiPlayerInfo = new GuiPlayerInfo(playerLogic, skin);
         guiPlayerInfo.setPosition(0, 700);
-        backGroundMenuImage.setPosition(0,690);
+        backGroundMenuImage.setPosition(0, 690);
         stage.addActor(backGroundMenuImage);
         stage.addActor(guiPlayerInfo);
         stage.addActor(menuGroup);
@@ -225,7 +255,7 @@ public class GameController {
             }
             ScreenManager.getInstance().pointCameraTo(pointOfView);
         }
-        if (Gdx.input.getX() > Gdx.graphics.getWidth() -20) { //1260
+        if (Gdx.input.getX() > Gdx.graphics.getWidth() - 20) { //1260
             pointOfView.x += CAMERA_SPEED * dt;
             if (pointOfView.x + ScreenManager.HALF_WORLD_WIDTH > BattleMap.MAP_WIDTH_PX) {
                 pointOfView.x = BattleMap.MAP_WIDTH_PX - ScreenManager.HALF_WORLD_WIDTH;
@@ -237,27 +267,35 @@ public class GameController {
     public float getWorldTimer() {
         return worldTimer;
     }
+
     public AiLogic getAiLogic() {
         return aiLogic;
     }
+
     public PlayerLogic getPlayerLogic() {
         return playerLogic;
     }
+
     public boolean isPaused() {
         return paused;
     }
+
     public Vector2 getMouse() {
         return mouse;
     }
+
     public Stage getStage() {
         return stage;
     }
+
     public Vector2 getStartSelection() {
         return startSelection;
     }
+
     public List<AbstractUnit> getSelectedUnits() {
         return selectedUnits;
     }
+
     public boolean isUnitSelected(AbstractUnit abstractUnit) {
         return selectedUnits.contains(abstractUnit);
     }
@@ -285,4 +323,13 @@ public class GameController {
     public Vector2 getPointOfView() {
         return pointOfView;
     }
+
+    public PathFinder getPathFinder() {
+        return pathFinder;
+    }
 }
+
+//        for (int i = 0; i < 5; i++) {   //  горящий курсор мыши
+//            particleController.setup(mouse.x, mouse.y, MathUtils.random(-15.0f, 15.0f), MathUtils.random(-30.0f, 30.0f), 0.5f,
+//                    0.3f, 1.4f, 1, 1, 0, 1, 1, 0, 0, 0.5f);
+//        }

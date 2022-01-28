@@ -23,6 +23,7 @@ public abstract class AbstractUnit extends GameObject implements Poolable, Targe
     protected Vector2 destination;
     protected Vector2 dustV1;
     protected Vector2 dustV2;
+    protected int realCellXDestination, realCellYDestination;
 
     protected int container;
     public static final int CONTAINER_POINT = 1;
@@ -77,23 +78,28 @@ public abstract class AbstractUnit extends GameObject implements Poolable, Targe
 
     public void update(Float dt) {
         // если цель выбрана движемся к ней до расстояния 200
-        if(target != null){
-            destination.set(target.getPosition());
-            if(position.dst(target.getPosition()) < minDstToActiveTarget){
-                destination.set(position);
+        if (target != null) {
+            commandMoveTo(target.getPosition(), false);
+            if (position.dst(target.getPosition()) < minDstToActiveTarget) {
+                commandMoveTo(position, false);
             }
         }
+        if (target == null) {
+            float angleTo = tmpV.set(destination).sub(position).angle(); // tmpV.set(destination).sub(position).angle();
+            weapon.setAngle(rotateTo(weapon.getAngle(), angleTo, 180.0f, dt));
+        }
 
+        updateWeapon(dt);
         // определение куда повернуться для движения
         if (position.dst(destination) > 3.0f) {
             float angleTo = tmpV.set(destination).sub(position).angle();
             angle = rotateTo(angle, angleTo, rotationSpeed, dt);
             moveTimer += dt;
             for (int i = 0; i < 2; i++) {               // пылевой шлейф при движении
-                dustV1.set(1,0);
-                dustV2.set(1,0);
-                dustV1.rotate(angle-25);                // определение 1 точки от куда  будет идти пыль
-                dustV2.rotate(angle+25);                // определение 2 точки от куда  будет идти пыль
+                dustV1.set(1, 0);
+                dustV2.set(1, 0);
+                dustV1.rotate(angle - 25);                // определение 1 точки от куда  будет идти пыль
+                dustV2.rotate(angle + 25);                // определение 2 точки от куда  будет идти пыль
                 dustV1.scl(-30);
                 dustV2.scl(-30);
                 dustV1.add(position);
@@ -117,8 +123,12 @@ public abstract class AbstractUnit extends GameObject implements Poolable, Targe
             if (position.dst(destination) < 120.0f && Math.abs(angleTo - angle) > 10) {     // исключение зацикливаний при повороте
                 position.mulAdd(tmpV, -dt);
             }
+        } else {
+            if (getCellX() == realCellXDestination && getCellY() == realCellYDestination) {
+                return;
+            }
+            gameController.getPathFinder().buildRoute(getCellX(), getCellY(), realCellXDestination, realCellYDestination, destination);
         }
-        updateWeapon(dt);
         chekCollision(dt);
     }
 
@@ -207,9 +217,15 @@ public abstract class AbstractUnit extends GameObject implements Poolable, Targe
         return weapon;
     }
 
-    public void commandMoveTo(Vector2 point){
-        destination.set(point);
-        target = null;
+    public void commandMoveTo(Vector2 point, boolean resetTarget) {
+        int cellPointX = (int) (point.x / BattleMap.CELL_SIZE);
+        int cellPointY = (int) (point.y / BattleMap.CELL_SIZE);
+        realCellXDestination = cellPointX;
+        realCellYDestination = cellPointY;
+        gameController.getPathFinder().buildRoute(getCellX(), getCellY(), realCellXDestination, realCellYDestination, destination);
+        if (resetTarget) {
+            target = null;
+        }
     }
 
     public abstract void commandAttack(Targetable target);

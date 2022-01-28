@@ -26,6 +26,7 @@ public class BattleTank extends AbstractUnit {
         this.position.set(x, y);
         this.destination = new Vector2(position);
         this.hp = hpMax;
+        commandMoveTo(destination,true);
     }
 
     @Override
@@ -46,14 +47,12 @@ public class BattleTank extends AbstractUnit {
             }
             float angleTo = tmpV.set(target.getPosition()).sub(position).angle();
             weapon.setAngle(rotateTo(weapon.getAngle(), angleTo, 180.0f, dt));
-            int power = weapon.use(dt);
-            if(power > -1){
-                gameController.getProjectesController().setup(this);
+            if(this.position.dst(target.getPosition())< weapon.getRange()) {
+                int power = weapon.use(dt);
+                if (power > -1) {
+                    gameController.getProjectesController().setup(this);
+                }
             }
-        }
-        if (target == null) {
-            float angleTo = tmpV.set(destination).sub(position).nor().angle(); // tmpV.set(destination).sub(position).angle();
-            weapon.setAngle(rotateTo(weapon.getAngle(), angleTo, 180.0f, dt));
         }
     }
 
@@ -62,7 +61,7 @@ public class BattleTank extends AbstractUnit {
         if(target.getType() == TargetType.UNIT && ((AbstractUnit)target).getOwnerType() != this.ownerType ){
             this.target = target;
         }else {
-            commandMoveTo(target.getPosition());
+            commandMoveTo(target.getPosition(),false);
         }
     }
 

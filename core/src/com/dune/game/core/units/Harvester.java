@@ -7,17 +7,16 @@ import com.dune.game.core.*;
 import com.dune.game.core.interfaces.Targetable;
 
 public class Harvester extends AbstractUnit {
-        private Vector2 targetPointHarvest;
-        private boolean harvesterWorking;
-        private float rotateAngle;
+    private Vector2 targetPointHarvest;
+    private boolean harvesterWorking;
 
     public Harvester(GameController gameController) {
         super(gameController);
         this.weaponsTextures = Assets.getInstance().getAtlas().findRegion("harvester");
         this.tankTextures = Assets.getInstance().getAtlas().findRegion("tankcore").split(64, 64)[0];
         this.minDstToActiveTarget = 5.0f;
-        this.weapon = new Weapon( 3f, 1);
-        this.speed = 120.0f;
+        this.weapon = new Weapon(3f, 1);
+        this.speed = 60.0f;
         this.hpMax = 500;
         this.container = 0; // емкость ресурсов
         this.unitType = UnitType.HARVESTER;
@@ -31,12 +30,13 @@ public class Harvester extends AbstractUnit {
         this.position.set(x, y);
         this.destination = new Vector2(position);
         this.hp = hpMax;
+        commandMoveTo(destination,true);
     }
 
     @Override
     public void renderGui(SpriteBatch batch) {
         // если активен сбор ресурса отрисовка прогресса тика сбора
-        if(container < CONTAINER_CAPACITY){
+        if (container < CONTAINER_CAPACITY) {
             if (weapon.getWeaponPercentage() > 0.0f) {
                 batch.setColor(0.2f, 0.0f, 0.0f, 1.0f);
                 batch.draw(progressBarTextures, position.x - 32, position.y + 43, 64, 8);
@@ -61,16 +61,10 @@ public class Harvester extends AbstractUnit {
 
     // перезарядка оружия танка
     public void updateWeapon(float dt) {
-        rotateAngle = rotateAngle + dt;
-        if (target == null) {
-            float angleTo = tmpV.set(destination).sub(position).angle(); // tmpV.set(destination).sub(position).angle();
-            weapon.setAngle(rotateTo(weapon.getAngle(), angleTo, 180.0f, dt));
-        }
-
-        if (gameController.getBattleMap().getResourceCount(position) > 0 && container<CONTAINER_CAPACITY) {
+        if (gameController.getBattleMap().getResourceCount(position) > 0 && container < CONTAINER_CAPACITY) {
             int result = weapon.use(dt);
             for (int i = 0; i < 3; i++) {               // Эффект сбора харвестером ресурса
-                tmpV.set(1,0);
+                tmpV.set(1, 0);
                 tmpV.rotate(angle);                     // определение 2 точки от куда  будет идти пыль
                 tmpV.scl(20);
                 tmpV.add(position);
@@ -87,12 +81,13 @@ public class Harvester extends AbstractUnit {
 
     @Override
     public boolean takeDamage(int damage) {
-        if(!isActive()){
+        if (!isActive()) {
             return false;
         }
-        this.hp -= damage*(container+1);    // урон по наполненому харвестеру увеличивается в зависимости от наполнения его емкости
-        return hp<0;
+        this.hp -= damage * (container + 1);    // урон по наполненому харвестеру увеличивается в зависимости от наполнения его емкости
+        return hp < 0;
     }
+
     public Vector2 getPosition() {
         return position;
     }
@@ -103,7 +98,7 @@ public class Harvester extends AbstractUnit {
 
     @Override
     public void commandAttack(Targetable target) {
-        commandMoveTo(target.getPosition());
+        commandMoveTo(target.getPosition(),false);
     }
 
     public void setTargetPointHarvest(Vector2 targetPointHarvest) {
@@ -122,7 +117,7 @@ public class Harvester extends AbstractUnit {
         return targetPointHarvest;
     }
 
-    public boolean isFullContainer(){
+    public boolean isFullContainer() {
         return container >= CONTAINER_CAPACITY;
     }
 

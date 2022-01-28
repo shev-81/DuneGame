@@ -10,13 +10,6 @@ dunestart
   orig: 800, 227
   offset: 0, 0
   index: -1
-base
-  rotate: false
-  xy: 804, 2
-  size: 140, 140
-  orig: 140, 140
-  offset: 0, 0
-  index: -1
 spices
   rotate: false
   xy: 2, 231
@@ -31,27 +24,6 @@ loading
   orig: 400, 80
   offset: 0, 0
   index: -1
-grass2
-  rotate: false
-  xy: 804, 144
-  size: 80, 80
-  orig: 80, 80
-  offset: 0, 0
-  index: -1
-grass
-  rotate: false
-  xy: 886, 144
-  size: 80, 80
-  orig: 80, 80
-  offset: 0, 0
-  index: -1
-desert
-  rotate: false
-  xy: 2, 395
-  size: 80, 80
-  orig: 80, 80
-  offset: 0, 0
-  index: -1
 tankcore
   rotate: false
   xy: 404, 313
@@ -61,105 +33,182 @@ tankcore
   index: -1
 tankanim
   rotate: false
-  xy: 404, 379
+  xy: 2, 395
   size: 320, 64
   orig: 320, 64
   offset: 0, 0
   index: -1
-turret
+trees
   rotate: false
-  xy: 946, 2
-  size: 64, 64
-  orig: 64, 64
+  xy: 2, 461
+  size: 300, 90
+  orig: 300, 90
   offset: 0, 0
   index: -1
-tank
+trees1
   rotate: false
-  xy: 946, 68
-  size: 64, 64
-  orig: 64, 64
+  xy: 2, 553
+  size: 300, 80
+  orig: 300, 80
   offset: 0, 0
   index: -1
-harvester
+clickmouse
   rotate: false
-  xy: 84, 395
-  size: 64, 64
-  orig: 64, 64
+  xy: 804, 2
+  size: 168, 24
+  orig: 168, 24
   offset: 0, 0
   index: -1
 menuchoice
   rotate: false
-  xy: 150, 395
+  xy: 804, 28
   size: 150, 60
   orig: 150, 60
   offset: 0, 0
   index: -1
 menu
   rotate: false
-  xy: 404, 445
+  xy: 804, 90
   size: 150, 60
   orig: 150, 60
   offset: 0, 0
   index: -1
-menuFon
+base
   rotate: false
-  xy: 1012, 2
-  size: 5, 30
-  orig: 5, 30
+  xy: 2, 635
+  size: 140, 140
+  orig: 140, 140
   offset: 0, 0
   index: -1
-clickmouse
+grass2
   rotate: false
-  xy: 556, 445
-  size: 168, 24
-  orig: 168, 24
+  xy: 804, 231
+  size: 80, 80
+  orig: 80, 80
+  offset: 0, 0
+  index: -1
+grass
+  rotate: false
+  xy: 886, 231
+  size: 80, 80
+  orig: 80, 80
+  offset: 0, 0
+  index: -1
+desert
+  rotate: false
+  xy: 726, 313
+  size: 80, 80
+  orig: 80, 80
   offset: 0, 0
   index: -1
 shootBall
   rotate: false
-  xy: 2, 477
+  xy: 804, 152
   size: 80, 16
   orig: 80, 16
   offset: 0, 0
   index: -1
+borderline
+  rotate: false
+  xy: 804, 170
+  size: 80, 2
+  orig: 80, 2
+  offset: 0, 0
+  index: -1
+tree2
+  rotate: false
+  xy: 144, 635
+  size: 66, 87
+  orig: 66, 87
+  offset: 0, 0
+  index: -1
+tree4
+  rotate: false
+  xy: 886, 152
+  size: 64, 68
+  orig: 64, 68
+  offset: 0, 0
+  index: -1
+turret
+  rotate: false
+  xy: 952, 152
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+tank
+  rotate: false
+  xy: 808, 313
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+harvester
+  rotate: false
+  xy: 874, 313
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+tree1
+  rotate: false
+  xy: 212, 635
+  size: 60, 86
+  orig: 60, 86
+  offset: 0, 0
+  index: -1
+progressbar
+  rotate: false
+  xy: 956, 28
+  size: 60, 8
+  orig: 60, 8
+  offset: 0, 0
+  index: -1
+tree3
+  rotate: false
+  xy: 956, 90
+  size: 48, 60
+  orig: 48, 60
+  offset: 0, 0
+  index: -1
+tree5
+  rotate: false
+  xy: 2, 777
+  size: 45, 88
+  orig: 45, 88
+  offset: 0, 0
+  index: -1
 star16
   rotate: false
-  xy: 968, 144
+  xy: 974, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 bullet2
   rotate: false
-  xy: 986, 144
+  xy: 992, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 bullet
   rotate: false
-  xy: 1004, 144
+  xy: 956, 38
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-progressbar
+menuFon
   rotate: false
-  xy: 946, 134
-  size: 60, 8
-  orig: 60, 8
-  offset: 0, 0
-  index: -1
-borderline
-  rotate: false
-  xy: 804, 226
-  size: 80, 2
-  orig: 80, 2
+  xy: 956, 56
+  size: 5, 30
+  orig: 5, 30
   offset: 0, 0
   index: -1
 choiceline
   rotate: false
-  xy: 1019, 2
+  xy: 974, 20
   size: 2, 2
   orig: 2, 2
   offset: 0, 0

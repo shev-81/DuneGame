@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.dune.game.core.Assets;
 
-public class MenuScreen extends AbstractScreen {
+public class GameOverPlWin extends AbstractScreen {
 
     private TextureRegion menuOneTexture;
     private TextureRegion menuThowTexture;
@@ -17,10 +17,10 @@ public class MenuScreen extends AbstractScreen {
     private TextureRegion tmp1Texture;
     private TextureRegion tmp2Texture;
     private BitmapFont font24;
-    private BitmapFont font32;
+    private BitmapFont font72;
     private Vector2 mouse;
 
-    public MenuScreen(SpriteBatch batch) {
+    public GameOverPlWin(SpriteBatch batch) {
         super(batch);
     }
 
@@ -32,7 +32,7 @@ public class MenuScreen extends AbstractScreen {
         this.menuThowTexture = Assets.getInstance().getAtlas().findRegion("menu");
         this.menuchoiceTexture = Assets.getInstance().getAtlas().findRegion("menuchoice");
         this.font24 =  Assets.getInstance().getAssetManager().get("fonts/Roboto-Medium24.ttf");
-        this.font32 =  Assets.getInstance().getAssetManager().get("fonts/Roboto-Medium32.ttf");
+        this.font72 =  Assets.getInstance().getAssetManager().get("fonts/Roboto-Medium72.ttf");
         this.tmp1Texture = this.menuOneTexture;
         this.tmp2Texture = this.menuThowTexture;
         this.mouse = new Vector2();
@@ -44,7 +44,8 @@ public class MenuScreen extends AbstractScreen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
-        batch.draw(startScreenTexture,250,300);
+//        batch.draw(startScreenTexture,250,300);
+        font72.draw(batch, "YOU WIN!", 0, 400, 1280, 1, false);
         batch.draw(menuOneTexture, 1280/2-75, 200);
         font24.draw(batch,"Play game", 0, 240, 1280,1,false);
         batch.draw(menuThowTexture, 1280/2-75, 140);

@@ -5,10 +5,12 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.dune.game.core.GameController;
 import com.dune.game.core.units.*;
+import com.dune.game.screens.ScreenManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.dune.game.core.BattleMap.CELL_SIZE;
 import static com.dune.game.core.units.Owner.AI;
 import static com.dune.game.core.units.Owner.PLAYER;
 
@@ -91,13 +93,19 @@ public class UnitsController {
                 }
             }
         }
+        if(aiUnits.size() == 0){
+            ScreenManager.getInstance().changeScreen(ScreenManager.ScreenType.GOPLWIN);
+        }
+        if(playerUnits.size() == 0){
+            ScreenManager.getInstance().changeScreen(ScreenManager.ScreenType.GOAIWIN);
+        }
     }
 
     public void createStartUnits(){
-        this.basePlayer = createBuilding(100,100, PLAYER);                                     //создание базы игрока
-        this.baseAi = createBuilding(1500,850, AI);                                            //создание базы АИ
+        this.basePlayer = createBuilding(100,100, PLAYER);                   //создание базы игрока
+        this.baseAi = createBuilding(27*CELL_SIZE,18*CELL_SIZE, AI);         //создание базы АИ
         createHarvester(basePlayer.getPosition().x+MathUtils.random(150,200), basePlayer.getPosition().y+MathUtils.random(150,200), PLAYER);//создание харвестера для игрока
-        createBattleTank(basePlayer.getPosition().x+MathUtils.random(150,200), basePlayer.getPosition().y+MathUtils.random(150,200), PLAYER);//создание харвестера для игрока
+        //createBattleTank(basePlayer.getPosition().x+MathUtils.random(150,200), basePlayer.getPosition().y+MathUtils.random(150,200), PLAYER);//создание харвестера для игрока
         createHarvester(baseAi.getPosition().x-MathUtils.random(150,200), baseAi.getPosition().y-MathUtils.random(150,200), AI);    //создание харвестера для АИ
     }
     public BattleTank createBattleTank (float x, float y, Owner owner){
@@ -109,7 +117,6 @@ public class UnitsController {
     public Building createBuilding (float x, float y, Owner owner){
         return buildingController.setup(x,y,owner);
     }
-
     public AbstractUnit getNearestAiUnit(Vector2 point){
         for(AbstractUnit aiUnit: aiUnits){
             if(aiUnit.getPosition().dst(point) <30){
@@ -118,31 +125,24 @@ public class UnitsController {
         }
         return null;
     }
-
     public List<Harvester> getPlayerHarvesterUnits() {
         return playerHarvesterUnits;
     }
-
     public Building getBasePlayer() {
         return basePlayer;
     }
-
     public Building getBaseAi() {
         return baseAi;
     }
-
     public List<BattleTank> getAiBattleTanks() {
         return aiBattleTanks;
     }
-
     public List<AbstractUnit> getUnits() {
         return units;
     }
-
     public List<AbstractUnit> getAiUnits() {
         return aiUnits;
     }
-
     public List<AbstractUnit> getPlayerUnits() {
         return playerUnits;
     }

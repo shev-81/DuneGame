@@ -70,7 +70,7 @@ public class Collider {
             if (u1.getUnitType() == UnitType.BUILDING) {
                 for (int j = 0; j < gameController.getUnitsController().getUnits().size(); j++) {
                     AbstractUnit u2 = gameController.getUnitsController().getUnits().get(j);
-                    if (u1.getPosition().dst(u2.getPosition()) < 40 && u2.getUnitType() == UnitType.HARVESTER && u2.getContainer() != 0) {
+                    if (u1.getPosition().dst(u2.getPosition()) < 60 && u2.getUnitType() == UnitType.HARVESTER && u2.getContainer() != 0) {
                         if(u2.getOwnerType() == Owner.PLAYER){
                             gameController.getPlayerLogic().addMoney(u2.getContainer());
                         }else{

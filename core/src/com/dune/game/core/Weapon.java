@@ -5,10 +5,12 @@ private float period;
     private float time;
     private int power;
     private float angle;
+    private float range;
 
     public Weapon( float period, int power) {
         this.period = period;
         this.power = power;
+        this.range = 360.0f;
     }
 
     public int getPower() {
@@ -17,6 +19,10 @@ private float period;
 
     public float getWeaponPercentage(){
         return time / period;
+    }
+
+    public float getRange() {
+        return range;
     }
 
     public float getAngle() {

@@ -39,13 +39,18 @@ public class Assets {
                 assetManager.load("game.pack", TextureAtlas.class);
                 createStandardFont(14);
                 createStandardFont(24);
+                createStandardFont(32);
                 createStandardFont(72);
                 break;
             case GAME:
+            case GOPLWIN:
+            case GOAIWIN:
                 assetManager.load("game.pack", TextureAtlas.class);
                 createStandardFont(12);
                 createStandardFont(14);
+                createStandardFont(24);
                 createStandardFont(32);
+                createStandardFont(72);
                 break;
         }
     }

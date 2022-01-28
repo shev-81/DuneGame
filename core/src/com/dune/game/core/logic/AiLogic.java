@@ -46,9 +46,9 @@ public class AiLogic {
             if(unit.getUnitType() == UnitType.HARVESTER){
                 if(unit.getContainer() < CONTAINER_CAPACITY) {
                     if(gameController.getBattleMap().getResourceNearestPosition(unit.getPosition()) == null){
-                        unit.commandMoveTo(gameController.getUnitsController().getBaseAi().getPosition());
+                        unit.commandMoveTo(gameController.getUnitsController().getBaseAi().getPosition(),true);
                     }else {
-                        unit.commandMoveTo(gameController.getBattleMap().getResourceNearestPosition(unit.getPosition()));
+                        unit.commandMoveTo(gameController.getBattleMap().getResourceNearestPosition(unit.getPosition()),true);
                     }
                 }
             }
@@ -58,7 +58,7 @@ public class AiLogic {
         for (int j = 0; j < gameController.getUnitsController().getUnits().size(); j++) {
             AbstractUnit hAi = gameController.getUnitsController().getUnits().get(j);
             if (aiB.getOwnerType() == hAi.getOwnerType() && hAi.getUnitType() == UnitType.HARVESTER && hAi.getContainer() >= CONTAINER_CAPACITY) {
-                hAi.commandMoveTo(aiB.getPosition());
+                hAi.commandMoveTo(aiB.getPosition(),true);
             }
         }
 

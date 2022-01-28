@@ -30,10 +30,8 @@ public class WorldRender {
         this.font12 = Assets.getInstance().getAssetManager().get("fonts/Roboto-Medium12.ttf");
         this.font32 = Assets.getInstance().getAssetManager().get("fonts/Roboto-Medium32.ttf");
         this.choiceTexture = Assets.getInstance().getAtlas().findRegion("choiceline");
-
         this.gameController = gameController;
         this.endSelection = new Vector2();
-
         this.frameBuffer = new FrameBuffer(Pixmap.Format.RGB888, ScreenManager.WORLD_WIDTH, ScreenManager.WORLD_HEIGHT, false);
         this.frameBufferRegion = new TextureRegion(frameBuffer.getColorBufferTexture());
         this.frameBufferRegion.flip(false, true);
@@ -45,15 +43,15 @@ public class WorldRender {
 
     public void render() {
         ScreenManager.getInstance().pointCameraTo(gameController.getPointOfView());
+        // отрисовка мира
         frameBuffer.begin();
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
         gameController.getBattleMap().render(batch);                    // отрисовка карты
-        gameController.getUnitsController().render(batch);             // отрисовка танков
+        gameController.getUnitsController().render(batch);              // отрисовка танков
         gameController.getProjectesController().render(batch);
         gameController.getParticleController().render(batch);
-        //font12.draw(batch,"Dune game", 1, 680, 1280,1,false);
         drawSelectionFrame();
         batch.end();
         frameBuffer.end();

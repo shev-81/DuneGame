@@ -12,7 +12,7 @@ import com.dune.game.core.Assets;
 
 public class ScreenManager {
     public enum ScreenType {
-        MENU, GAME
+        MENU, GAME, GOAIWIN, GOPLWIN
     }
 
     public static final int WORLD_WIDTH = 1280;
@@ -25,6 +25,8 @@ public class ScreenManager {
     private LoadingScreen loadingScreen;
     private GameScreen gameScreen;
     private MenuScreen menuScreen;
+    private GameOverAiWin gameOverAiWin;
+    private GameOverPlWin gameOverPlWin;
     private Screen targetScreen;
     private Viewport viewport;
     private Camera camera;
@@ -53,6 +55,8 @@ public class ScreenManager {
         this.viewport = new FitViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
         this.gameScreen = new GameScreen(batch);
         this.menuScreen = new MenuScreen(batch);
+        this.gameOverAiWin = new GameOverAiWin(batch);
+        this.gameOverPlWin = new GameOverPlWin(batch);
         this.loadingScreen = new LoadingScreen(batch);
     }
 
@@ -92,6 +96,14 @@ public class ScreenManager {
             case GAME:
                 targetScreen = gameScreen;
                 Assets.getInstance().loadAssets(ScreenType.GAME);
+                break;
+            case GOAIWIN:
+                targetScreen = gameOverAiWin;
+                Assets.getInstance().loadAssets(ScreenType.GOAIWIN);
+                break;
+            case GOPLWIN:
+                targetScreen = gameOverPlWin;
+                Assets.getInstance().loadAssets(ScreenType.GOPLWIN);
                 break;
         }
     }
