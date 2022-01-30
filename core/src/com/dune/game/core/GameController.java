@@ -2,8 +2,10 @@ package com.dune.game.core;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -20,13 +22,12 @@ import com.dune.game.core.controllers.UnitsController;
 import com.dune.game.core.gui.GuiPlayerInfo;
 import com.dune.game.core.logic.AiLogic;
 import com.dune.game.core.logic.PlayerLogic;
-import com.dune.game.core.units.AbstractUnit;
-import com.dune.game.core.units.Harvester;
-import com.dune.game.core.units.Owner;
-import com.dune.game.core.units.UnitType;
+import com.dune.game.core.units.*;
 import com.dune.game.screens.ScreenManager;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.dune.game.core.units.Owner.PLAYER;
 
 public class GameController {
 
@@ -48,9 +49,13 @@ public class GameController {
     private Vector2 pointOfView;
     private Vector2 pointHarvest;
     private Vector2 tmpV;
-    private TextButton testBtn;
+    private TextButton crHarButton;
+    private TextButton crBtButton;
+    private Group menuBaseGroup;
     private Stage stage;
     private Music music;
+    private Sound clickMouse;
+    private Sound shotTank;
 
     // инициализация игровой логики
     public GameController() {
@@ -69,6 +74,8 @@ public class GameController {
         this.mouse = new Vector2();
         this.pointOfView = new Vector2(ScreenManager.HALF_WORLD_WIDTH, ScreenManager.HALF_WORLD_HEIGHT);
         this.music = Gdx.audio.newMusic(Gdx.files.internal("music/menu_music.mp3"));
+        this.clickMouse = Gdx.audio.newSound(Gdx.files.internal("music/click_mouse.wav"));
+        this.shotTank = Gdx.audio.newSound(Gdx.files.internal("music/tank_shot.wav"));
         this.music.setVolume(0.08f);
         this.music.setLooping(true);
         this.music.play();
@@ -112,6 +119,9 @@ public class GameController {
 
             @Override
             public boolean touchUp(int screenX, int screenY, int pointer, int button) {  // кнопка отпущена
+                if(selectedUnits.size() != 0){
+                    clickMouse.play();
+                }
                 if (button == Input.Buttons.LEFT) {
                     tmpV.set(mouse);
                     if (tmpV.x < startSelection.x) {    // инвертирование выделения юнитов с другой стороны
@@ -132,12 +142,13 @@ public class GameController {
                                 unitProcessing(unit);
                             }
                             if (unit.getOwnerType() == Owner.PLAYER && unit.getUnitType() == UnitType.BUILDING) {
-                                getTestBtn().setVisible(true);
+                                menuBaseGroup.setVisible(true);
                             }
                         }
                         selectedUnits.clear();
                     }
-                    if (Math.abs(tmpV.x - startSelection.x) > 20 & Math.abs(tmpV.y - startSelection.y) > 20) { // обработка простого клика по месту
+                    // обработка простого клика по месту
+                    if (Math.abs(tmpV.x - startSelection.x) > 20 & Math.abs(tmpV.y - startSelection.y) > 20) {
                         for (AbstractUnit unit : unitsController.getPlayerUnits()) {
                             if (unit.getPosition().x > startSelection.x && unit.getPosition().x < tmpV.x
                                     && unit.getPosition().y > tmpV.y && unit.getPosition().y < startSelection.y) {
@@ -192,6 +203,7 @@ public class GameController {
         TextButton.TextButtonStyle textButtonStyle = new TextButton.TextButtonStyle(
                 skin.getDrawable("menu"), null, null, font14);
 
+        // кнопка меню
         final TextButton menuBtn = new TextButton("Menu", textButtonStyle);
         menuBtn.addListener(new ClickListener() {
             @Override
@@ -203,31 +215,69 @@ public class GameController {
         Image backGroundMenuImage = new Image(skin.getRegion("menuFon"));
         backGroundMenuImage.setWidth(1280);
 
-        // обработчик тест биттон
-        testBtn = new TextButton("harvester", textButtonStyle);
-        testBtn.addListener(new ClickListener() {
+        // кнопка создание харвестера
+        crHarButton = new TextButton("Harvester", textButtonStyle);
+        crHarButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                unitsController.createHarvester(100, 100, Owner.PLAYER);
+                //  если денег хватает на боевой танк то создаем
+                if (playerLogic.getMoney() >= 1000 && playerLogic.getUnitsCount() < playerLogic.getUnitsMaxCount()) {
+                    Building basePlayer = getUnitsController().getBasePlayer();  // определяем базу
+                    if (basePlayer.isActive()) {
+                        Harvester harvester = getUnitsController().createHarvester(basePlayer.getPosition().x, basePlayer.getPosition().y, PLAYER);
+                        tmpV.set(basePlayer.getPosition().x + MathUtils.random(150, 200), basePlayer.getPosition().y + MathUtils.random(150, 200));
+                        harvester.commandMoveTo(tmpV,true);
+                    }
+                    playerLogic.minusMoney(1000);
+                }
             }
         });
+        crHarButton.setVisible(true);
 
+        // кнопка создание боевого
+        crBtButton = new TextButton("Battle tank", textButtonStyle);
+        crBtButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                //  если денег хватает на боевой танк то создаем
+                if (playerLogic.getMoney() >= 1000 && playerLogic.getUnitsCount() < playerLogic.getUnitsMaxCount()) {
+                    Building basePlayer = getUnitsController().getBasePlayer();  // определяем базу
+                    if (basePlayer.isActive()) {
+                        BattleTank tank = getUnitsController().createBattleTank(basePlayer.getPosition().x, basePlayer.getPosition().y, PLAYER);
+                        tmpV.set(basePlayer.getPosition().x + MathUtils.random(150, 200), basePlayer.getPosition().y + MathUtils.random(150, 200));
+                        tank.commandMoveTo(tmpV,true);
+                    }
+                    playerLogic.minusMoney(1000);
+                }
+            }
+        });
+        crBtButton.setVisible(true);
+
+        // группа меню базы
+        menuBaseGroup = new Group();
+        crBtButton.setPosition(0, 0);
+        crHarButton.setPosition(0, 60);
+        menuBaseGroup.addActor(crBtButton);
+        menuBaseGroup.addActor(crHarButton);
+        menuBaseGroup.setPosition(unitsController.getBasePlayer().position.x + 50, unitsController.getBasePlayer().position.y + 50);
+        menuBaseGroup.setVisible(true);
+
+        // группа меню
         Group menuGroup = new Group();
         menuBtn.setPosition(0, 0);
-        testBtn.setPosition(unitsController.getBasePlayer().position.x + 50, unitsController.getBasePlayer().position.y + 50);
         menuGroup.addActor(menuBtn);
-//        menuGroup.addActor(testBtn);
         menuGroup.setPosition(1130, 680);
-        getStage().addActor(testBtn);
-        testBtn.setVisible(false);
+
+        // интерфейс игры
         Label.LabelStyle labelStyle = new Label.LabelStyle(font14, Color.WHITE);
         skin.add("simpleLabel", labelStyle);
-
         guiPlayerInfo = new GuiPlayerInfo(playerLogic, skin);
         guiPlayerInfo.setPosition(0, 700);
         backGroundMenuImage.setPosition(0, 690);
         stage.addActor(backGroundMenuImage);
+        //stage.addActor(crHarButton);
         stage.addActor(guiPlayerInfo);
+        stage.addActor(menuBaseGroup);
         stage.addActor(menuGroup);
         skin.dispose();
     }
@@ -292,6 +342,14 @@ public class GameController {
         return startSelection;
     }
 
+    public Sound getClickMouse() {
+        return clickMouse;
+    }
+
+    public Sound getShotTank() {
+        return shotTank;
+    }
+
     public List<AbstractUnit> getSelectedUnits() {
         return selectedUnits;
     }
@@ -316,8 +374,8 @@ public class GameController {
         return particleController;
     }
 
-    public TextButton getTestBtn() {
-        return testBtn;
+    public Group getMenuBaseGroup() {
+        return menuBaseGroup;
     }
 
     public Vector2 getPointOfView() {

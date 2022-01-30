@@ -111,8 +111,8 @@ public class UnitsController {
     public BattleTank createBattleTank (float x, float y, Owner owner){
         return battleTankController.setup(x,y,owner);
     }
-    public void createHarvester (float x, float y, Owner owner){
-        harvestersController.setup(x,y,owner);
+    public Harvester createHarvester (float x, float y, Owner owner){
+        return harvestersController.setup(x,y,owner);
     }
     public Building createBuilding (float x, float y, Owner owner){
         return buildingController.setup(x,y,owner);

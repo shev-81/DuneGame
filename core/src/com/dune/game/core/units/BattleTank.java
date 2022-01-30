@@ -50,6 +50,10 @@ public class BattleTank extends AbstractUnit {
             if(this.position.dst(target.getPosition())< weapon.getRange()) {
                 int power = weapon.use(dt);
                 if (power > -1) {
+                    if(gameController.getPointOfView().dst(this.position) < 500){         // проигрывание звука выстрела
+                        float volume = (1 - gameController.getPointOfView().dst(this.position)/500) / 2;
+                        gameController.getShotTank().play(volume);
+                    }
                     gameController.getProjectesController().setup(this);
                 }
             }

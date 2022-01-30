@@ -42,17 +42,7 @@ public class PlayerLogic {
         }
         // если здание базы не выбрано то скрываем кнопку
         if (!gameController.getSelectedUnits().contains(gameController.getUnitsController().getBasePlayer())) {
-            gameController.getTestBtn().setVisible(false);
-        }
-        //  если денег хватает на боевой танк то создаем
-        if (money >= 1000 && getUnitsCount() < unitsMaxCount) {
-            Building basePlayer = gameController.getUnitsController().getBasePlayer();  // определяем базу
-            if (basePlayer.isActive()) {
-                BattleTank tank = gameController.getUnitsController().createBattleTank(basePlayer.getPosition().x, basePlayer.getPosition().y, PLAYER);
-                tmpV.set(basePlayer.getPosition().x + MathUtils.random(150, 200), basePlayer.getPosition().y + MathUtils.random(150, 200));
-                tank.commandMoveTo(tmpV,true);
-            }
-            money = money - 1000;
+            gameController.getMenuBaseGroup().setVisible(false);
         }
         // если харвестер готов к разгрузке то едет на базу выгружать ресурс
         Building plB = gameController.getUnitsController().getBasePlayer();
@@ -96,6 +86,9 @@ public class PlayerLogic {
 
     public void addMoney(int money) {
         this.money = this.money + money * 100;
+    }
+    public void minusMoney(int money) {
+        this.money = this.money - money;
     }
 
     public int getUnitsMaxCount() {
