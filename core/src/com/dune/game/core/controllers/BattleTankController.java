@@ -32,8 +32,6 @@ public class BattleTankController extends ObjectPool<BattleTank> {
         return tank;
     }
 
-
-
     @Override
     protected BattleTank newObject() {
         return new BattleTank(gameController);

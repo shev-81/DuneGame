@@ -33,6 +33,18 @@ private float period;
         this.angle = angle;
     }
 
+    public void setPeriod(float period) {
+        this.period = period;
+    }
+
+    public void setPower(int power) {
+        this.power = power;
+    }
+
+    public void setRange(float range) {
+        this.range = range;
+    }
+
     public int use (float dt){
         time += dt;
         if(time > period){

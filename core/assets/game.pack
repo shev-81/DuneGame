@@ -143,16 +143,30 @@ tank
   orig: 64, 64
   offset: 0, 0
   index: -1
-harvester
+roketturret
   rotate: false
   xy: 874, 313
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
-tree1
+healbot
+  rotate: false
+  xy: 940, 313
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+harvester
   rotate: false
   xy: 212, 635
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+tree1
+  rotate: false
+  xy: 2, 777
   size: 60, 86
   orig: 60, 86
   offset: 0, 0
@@ -173,7 +187,7 @@ tree3
   index: -1
 tree5
   rotate: false
-  xy: 2, 777
+  xy: 2, 865
   size: 45, 88
   orig: 45, 88
   offset: 0, 0
@@ -185,23 +199,30 @@ star16
   orig: 16, 16
   offset: 0, 0
   index: -1
-bullet2
+roket
   rotate: false
   xy: 992, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-bullet
+bullet2
   rotate: false
   xy: 956, 38
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-menuFon
+bullet
   rotate: false
   xy: 956, 56
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+menuFon
+  rotate: false
+  xy: 974, 38
   size: 5, 30
   orig: 5, 30
   offset: 0, 0

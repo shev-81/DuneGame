@@ -9,6 +9,7 @@ import com.dune.game.core.interfaces.Targetable;
 
 public class Building extends AbstractUnit{
     protected TextureRegion buildingTextures;
+    protected int lvlUpgrade;
 
 
     public Building(GameController gameController) {
@@ -16,6 +17,7 @@ public class Building extends AbstractUnit{
         this.buildingTextures = Assets.getInstance().getAtlas().findRegion("base");
         this.hpMax = 500;
         this.unitType = UnitType.BUILDING;
+        this.lvlUpgrade = 1;
     }
 
     @Override
@@ -55,6 +57,13 @@ public class Building extends AbstractUnit{
     public void update(float dt) {
     }
 
+    public int getLvlUpgrade() {
+        return lvlUpgrade;
+    }
+
+    public void upGradeBuilding(){
+        lvlUpgrade++;
+    }
     @Override
     public void renderGui(SpriteBatch batch) {
     }

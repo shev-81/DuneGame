@@ -5,7 +5,6 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -19,6 +18,7 @@ import com.dune.game.core.controllers.Collider;
 import com.dune.game.core.controllers.ParticleController;
 import com.dune.game.core.controllers.ProjectesController;
 import com.dune.game.core.controllers.UnitsController;
+import com.dune.game.core.gui.GuiMenuBase;
 import com.dune.game.core.gui.GuiPlayerInfo;
 import com.dune.game.core.logic.AiLogic;
 import com.dune.game.core.logic.PlayerLogic;
@@ -27,12 +27,11 @@ import com.dune.game.screens.ScreenManager;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.dune.game.core.units.Owner.PLAYER;
-
 public class GameController {
 
     private static final float CAMERA_SPEED = 240.0f;
     private GuiPlayerInfo guiPlayerInfo;
+    private GuiMenuBase baseMenu;
     private BattleMap battleMap;
     private boolean paused;
     private float worldTimer;
@@ -49,13 +48,9 @@ public class GameController {
     private Vector2 pointOfView;
     private Vector2 pointHarvest;
     private Vector2 tmpV;
-    private TextButton crHarButton;
-    private TextButton crBtButton;
-    private Group menuBaseGroup;
     private Stage stage;
     private Music music;
     private Sound clickMouse;
-    private Sound shotTank;
 
     // инициализация игровой логики
     public GameController() {
@@ -75,8 +70,7 @@ public class GameController {
         this.pointOfView = new Vector2(ScreenManager.HALF_WORLD_WIDTH, ScreenManager.HALF_WORLD_HEIGHT);
         this.music = Gdx.audio.newMusic(Gdx.files.internal("music/menu_music.mp3"));
         this.clickMouse = Gdx.audio.newSound(Gdx.files.internal("music/click_mouse.wav"));
-        this.shotTank = Gdx.audio.newSound(Gdx.files.internal("music/tank_shot.wav"));
-        this.music.setVolume(0.08f);
+        this.music.setVolume(0.05f);
         this.music.setLooping(true);
         this.music.play();
         createGuiAndPrepareGameInput();
@@ -142,7 +136,7 @@ public class GameController {
                                 unitProcessing(unit);
                             }
                             if (unit.getOwnerType() == Owner.PLAYER && unit.getUnitType() == UnitType.BUILDING) {
-                                menuBaseGroup.setVisible(true);
+                                baseMenu.setVisible(true);
                             }
                         }
                         selectedUnits.clear();
@@ -191,6 +185,14 @@ public class GameController {
                 unit.commandAttack(aiUnit);
             }
         }
+        if (unit.getUnitType() == UnitType.HEALTANK) {
+            AbstractUnit PlUnit = getUnitsController().getNearestPlUnit(getMouse());
+            if (PlUnit == null) {
+                unit.commandMoveTo(getMouse(), true);
+            } else {
+                unit.commandAttack(PlUnit);
+            }
+        }
     }
 
     // метод создания интерфейса в игре
@@ -199,7 +201,7 @@ public class GameController {
         Gdx.input.setInputProcessor(new InputMultiplexer(stage, prepareSelection()));  // мультиплексер задает какой обработчик будет выполненым первым
         Skin skin = new Skin();
         skin.addRegions(Assets.getInstance().getAtlas());
-        BitmapFont font14 = Assets.getInstance().getAssetManager().get("fonts/Roboto-Medium14.ttf");
+        BitmapFont font14 = Assets.getInstance().getAssetManager().get("fonts/Roboto-Medium24.ttf");
         TextButton.TextButtonStyle textButtonStyle = new TextButton.TextButtonStyle(
                 skin.getDrawable("menu"), null, null, font14);
 
@@ -215,53 +217,6 @@ public class GameController {
         Image backGroundMenuImage = new Image(skin.getRegion("menuFon"));
         backGroundMenuImage.setWidth(1280);
 
-        // кнопка создание харвестера
-        crHarButton = new TextButton("Harvester", textButtonStyle);
-        crHarButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                //  если денег хватает на боевой танк то создаем
-                if (playerLogic.getMoney() >= 1000 && playerLogic.getUnitsCount() < playerLogic.getUnitsMaxCount()) {
-                    Building basePlayer = getUnitsController().getBasePlayer();  // определяем базу
-                    if (basePlayer.isActive()) {
-                        Harvester harvester = getUnitsController().createHarvester(basePlayer.getPosition().x, basePlayer.getPosition().y, PLAYER);
-                        tmpV.set(basePlayer.getPosition().x + MathUtils.random(150, 200), basePlayer.getPosition().y + MathUtils.random(150, 200));
-                        harvester.commandMoveTo(tmpV,true);
-                    }
-                    playerLogic.minusMoney(1000);
-                }
-            }
-        });
-        crHarButton.setVisible(true);
-
-        // кнопка создание боевого
-        crBtButton = new TextButton("Battle tank", textButtonStyle);
-        crBtButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                //  если денег хватает на боевой танк то создаем
-                if (playerLogic.getMoney() >= 1000 && playerLogic.getUnitsCount() < playerLogic.getUnitsMaxCount()) {
-                    Building basePlayer = getUnitsController().getBasePlayer();  // определяем базу
-                    if (basePlayer.isActive()) {
-                        BattleTank tank = getUnitsController().createBattleTank(basePlayer.getPosition().x, basePlayer.getPosition().y, PLAYER);
-                        tmpV.set(basePlayer.getPosition().x + MathUtils.random(150, 200), basePlayer.getPosition().y + MathUtils.random(150, 200));
-                        tank.commandMoveTo(tmpV,true);
-                    }
-                    playerLogic.minusMoney(1000);
-                }
-            }
-        });
-        crBtButton.setVisible(true);
-
-        // группа меню базы
-        menuBaseGroup = new Group();
-        crBtButton.setPosition(0, 0);
-        crHarButton.setPosition(0, 60);
-        menuBaseGroup.addActor(crBtButton);
-        menuBaseGroup.addActor(crHarButton);
-        menuBaseGroup.setPosition(unitsController.getBasePlayer().position.x + 50, unitsController.getBasePlayer().position.y + 50);
-        menuBaseGroup.setVisible(true);
-
         // группа меню
         Group menuGroup = new Group();
         menuBtn.setPosition(0, 0);
@@ -272,40 +227,40 @@ public class GameController {
         Label.LabelStyle labelStyle = new Label.LabelStyle(font14, Color.WHITE);
         skin.add("simpleLabel", labelStyle);
         guiPlayerInfo = new GuiPlayerInfo(playerLogic, skin);
+        baseMenu = new GuiMenuBase(playerLogic, unitsController, textButtonStyle);  // интерфейс меню базы
         guiPlayerInfo.setPosition(0, 700);
         backGroundMenuImage.setPosition(0, 690);
         stage.addActor(backGroundMenuImage);
-        //stage.addActor(crHarButton);
         stage.addActor(guiPlayerInfo);
-        stage.addActor(menuBaseGroup);
+        stage.addActor(baseMenu);
         stage.addActor(menuGroup);
         skin.dispose();
     }
 
     // метод контроля границ игровой зоны
     public void changePOV(float dt) {
-        if (Gdx.input.getY() < 20) {
+        if (Gdx.input.getY() < 50) {
             pointOfView.y += CAMERA_SPEED * dt;
             if (pointOfView.y + ScreenManager.HALF_WORLD_HEIGHT > BattleMap.MAP_HEIGHT_PX) {
                 pointOfView.y = BattleMap.MAP_HEIGHT_PX - ScreenManager.HALF_WORLD_HEIGHT;
             }
             ScreenManager.getInstance().pointCameraTo(pointOfView);
         }
-        if (Gdx.input.getY() > Gdx.graphics.getHeight() - 20) { //700
+        if (Gdx.input.getY() > Gdx.graphics.getHeight() - 50) { //700
             pointOfView.y -= CAMERA_SPEED * dt;
             if (pointOfView.y < ScreenManager.HALF_WORLD_HEIGHT) {
                 pointOfView.y = ScreenManager.HALF_WORLD_HEIGHT;
             }
             ScreenManager.getInstance().pointCameraTo(pointOfView);
         }
-        if (Gdx.input.getX() < 20) {
+        if (Gdx.input.getX() < 50) {
             pointOfView.x -= CAMERA_SPEED * dt;
             if (pointOfView.x < ScreenManager.HALF_WORLD_WIDTH) {
                 pointOfView.x = ScreenManager.HALF_WORLD_WIDTH;
             }
             ScreenManager.getInstance().pointCameraTo(pointOfView);
         }
-        if (Gdx.input.getX() > Gdx.graphics.getWidth() - 20) { //1260
+        if (Gdx.input.getX() > Gdx.graphics.getWidth() - 50) { //1260
             pointOfView.x += CAMERA_SPEED * dt;
             if (pointOfView.x + ScreenManager.HALF_WORLD_WIDTH > BattleMap.MAP_WIDTH_PX) {
                 pointOfView.x = BattleMap.MAP_WIDTH_PX - ScreenManager.HALF_WORLD_WIDTH;
@@ -313,75 +268,61 @@ public class GameController {
             ScreenManager.getInstance().pointCameraTo(pointOfView);
         }
     }
-
     public float getWorldTimer() {
         return worldTimer;
     }
-
     public AiLogic getAiLogic() {
         return aiLogic;
     }
-
     public PlayerLogic getPlayerLogic() {
         return playerLogic;
     }
-
     public boolean isPaused() {
         return paused;
     }
-
     public Vector2 getMouse() {
         return mouse;
     }
-
     public Stage getStage() {
         return stage;
     }
-
     public Vector2 getStartSelection() {
         return startSelection;
     }
-
     public Sound getClickMouse() {
         return clickMouse;
-    }
-
-    public Sound getShotTank() {
-        return shotTank;
     }
 
     public List<AbstractUnit> getSelectedUnits() {
         return selectedUnits;
     }
-
     public boolean isUnitSelected(AbstractUnit abstractUnit) {
         return selectedUnits.contains(abstractUnit);
     }
-
     public ProjectesController getProjectesController() {
         return projectesController;
     }
-
     public UnitsController getUnitsController() {
         return unitsController;
     }
-
     public BattleMap getBattleMap() {
         return battleMap;
     }
-
     public ParticleController getParticleController() {
         return particleController;
     }
-
-    public Group getMenuBaseGroup() {
-        return menuBaseGroup;
+    public Group getBaseMenu() {
+        return baseMenu;
     }
-
     public Vector2 getPointOfView() {
         return pointOfView;
     }
-
+    public Group getCreateTanksMenu() {
+        return baseMenu.getCreateTanksMenu();
+    }
+    public Group getUpgradesMenu() {
+        return baseMenu.getUpgradesMenu();
+    }
     public PathFinder getPathFinder() {
         return pathFinder;
     }

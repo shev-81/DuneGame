@@ -1,13 +1,8 @@
 package com.dune.game.core.logic;
 
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.dune.game.core.GameController;
 import com.dune.game.core.units.*;
-
-
-import static com.dune.game.core.units.Owner.PLAYER;
-
 
 public class PlayerLogic {
 
@@ -23,6 +18,7 @@ public class PlayerLogic {
         this.tmpV = new Vector2();
         this.tmpPointHarv = new Vector2();
         this.unitsMaxCount = 5;
+        this.money = 1000;
     }
 
     public void update(float dt) {
@@ -42,7 +38,9 @@ public class PlayerLogic {
         }
         // если здание базы не выбрано то скрываем кнопку
         if (!gameController.getSelectedUnits().contains(gameController.getUnitsController().getBasePlayer())) {
-            gameController.getMenuBaseGroup().setVisible(false);
+            gameController.getBaseMenu().setVisible(false);
+            gameController.getCreateTanksMenu().setVisible(false);
+            gameController.getUpgradesMenu().setVisible(false);
         }
         // если харвестер готов к разгрузке то едет на базу выгружать ресурс
         Building plB = gameController.getUnitsController().getBasePlayer();
@@ -65,11 +63,11 @@ public class PlayerLogic {
                 }
                 // если контейнер не пуст и не полон то назначаем ему ближайшую точку сбора ресурса
                 if (hPl.getContainer() > 0 && hPl.getContainer() < hPl.CONTAINER_CAPACITY) {
-                    tmpV.set(gameController.getBattleMap().getResourceNearestPosition(hPl.getPosition()));      // определяем ближайшую точку с ресурсом от точки сбора
-                    if (tmpV.dst(hPl.getPosition()) < 200) {                                                      // если ближайшая точка сбора ресурсов не далеко от точки сбора то едем
-                        hPl.commandMoveTo(tmpV,false);                                                                // определенной пользователем то при отсутствиии ресурсов стоим на ней
-                    } else {                                                                                      // то едем
-                        hPl.commandMoveTo(hPl.getTargetPointHarvest(),true);                                         // а иначе елем на точку сбора
+                    tmpV.set(gameController.getBattleMap().getResourceNearestPosition(hPl.getPosition()));     // определяем ближайшую точку с ресурсом от точки сбора
+                    if (tmpV.dst(hPl.getPosition()) < 200) {                                                   // если ближайшая точка сбора ресурсов не далеко от точки сбора то едем
+                        hPl.commandMoveTo(tmpV,false);                                                // определенной пользователем то при отсутствиии ресурсов стоим на ней
+                    } else {                                                                                   // то едем
+                        hPl.commandMoveTo(hPl.getTargetPointHarvest(),true);                          // а иначе елем на точку сбора
                     }
                 }
             }
@@ -79,11 +77,12 @@ public class PlayerLogic {
     public int getMoney() {
         return money;
     }
-
+    public void addUnitsMaxCount(){
+        unitsMaxCount++;
+    }
     public int getUnitsCount() {
         return gameController.getUnitsController().getPlayerUnits().size();
     }
-
     public void addMoney(int money) {
         this.money = this.money + money * 100;
     }

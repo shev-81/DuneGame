@@ -13,19 +13,27 @@ public class AiLogic {
     private GameController gameController;
     private int moneyAi;
     private Vector2 tmpV;
-    private int unitsMaxCount;
+    private int unitsMaxCountAi;
 
 
     public AiLogic(GameController gameController) {
         this.gameController = gameController;
         this.tmpV = new Vector2();
-        this.unitsMaxCount = 5;
+        this.unitsMaxCountAi = 5;
+        this.moneyAi = 1000;
     }
 
     public void update(float dt){
+        if(gameController.getUnitsController().getAiHarvesterUnits().size() == 0 && moneyAi >= 1000){
+            gameController.getUnitsController().createHarvester(
+                    gameController.getUnitsController().getBaseAi().getPosition().x-MathUtils.random(150,200),
+                    gameController.getUnitsController().getBaseAi().getPosition().y-MathUtils.random(150,200), AI);
+            moneyAi -= 1000;
+        }
         // если есть несколько боевых танков то отправляем их воевать с игроком
-        if(gameController.getUnitsController().getAiBattleTanks().size() >= 2){
-            for (int i = 0; i < gameController.getUnitsController().getAiBattleTanks().size(); i++) {
+        if(gameController.getUnitsController().getAiUnits().size() == unitsMaxCountAi &&
+           gameController.getUnitsController().getAiBattleTanks().size() >= gameController.getUnitsController().getBaseAi().getLvlUpgrade() && moneyAi >= 1000){
+            for (int i = 0; i < gameController.getUnitsController().getBaseAi().getLvlUpgrade(); i++) {
                 BattleTank aiBt = gameController.getUnitsController().getAiBattleTanks().get(i);
                 if(gameController.getUnitsController().getPlayerHarvesterUnits().size()>0){
                     aiBt.setTarget(gameController.getUnitsController().getPlayerHarvesterUnits().get(0));
@@ -62,12 +70,17 @@ public class AiLogic {
             }
         }
 
-        if(moneyAi >= 1000 && getUnitsCount() < unitsMaxCount){    //  если денег хватает на боевой танк и юнитов меньше максимально доступных то создаем
+        if(moneyAi >= 1000 && getUnitsCount() < unitsMaxCountAi){    //  если денег хватает на боевой танк и юнитов меньше максимально доступных то создаем
             Building baseAi = gameController.getUnitsController().getBaseAi();  // определяем базу
             if(baseAi.isActive()){
                 gameController.getUnitsController().createBattleTank(baseAi.getPosition().x-MathUtils.random(150,200), baseAi.getPosition().y-MathUtils.random(150,200), AI);
             }
-            moneyAi =moneyAi - 1000;
+            moneyAi = moneyAi - 1000;
+        }
+        if(moneyAi >= 1000 && getUnitsCount() == unitsMaxCountAi) {    //  покупаем апгрейд здания и увеличиваем кап юнитов
+            gameController.getUnitsController().getBaseAi().upGradeBuilding();
+            unitsMaxCountAi++;
+            moneyAi -=1000;
         }
     }
     public int getUnitsCount() {

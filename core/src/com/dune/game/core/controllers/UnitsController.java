@@ -18,12 +18,16 @@ public class UnitsController {
     private BattleTankController battleTankController;
     private HarvestersController harvestersController;
     private BuildingController buildingController;
+    private HealBotsController healBotsController;
     private GameController gameController;
     private List <AbstractUnit> units;
     private List <AbstractUnit> playerUnits;
     private List <AbstractUnit> aiUnits;
     private List <BattleTank> aiBattleTanks;
+    private List <BattleTank> playerBattleTanks;
     private List <Harvester> playerHarvesterUnits;
+    private List <Harvester> aiHarvesterUnits;
+    private List <HealTank> playerHealTanks;
     private Building basePlayer;  // определяем базу
     private Building baseAi;      // определяем базу
 
@@ -31,18 +35,24 @@ public class UnitsController {
         this.gameController = gameController;
         this.battleTankController = new BattleTankController(gameController);
         this.harvestersController = new HarvestersController(gameController);
+        this.healBotsController = new HealBotsController(gameController);
         this.buildingController = new BuildingController(gameController);
         this.units = new ArrayList<>();
         this.playerUnits = new ArrayList<>();
+        this.playerHealTanks = new ArrayList<>();
+        this.playerBattleTanks = new ArrayList<>();
+        this.aiHarvesterUnits = new ArrayList<>();
         this.playerHarvesterUnits = new ArrayList<>();
         this.aiUnits = new ArrayList<>();
         this.aiBattleTanks = new ArrayList<>();
+
         createStartUnits();
     }
     public void render(SpriteBatch batch){
         buildingController.render(batch);
         battleTankController.render(batch);
         harvestersController.render(batch);
+        healBotsController.render(batch);
 
         // рамка выбора юнитов
         for(AbstractUnit unit: gameController.getSelectedUnits()) {
@@ -71,25 +81,39 @@ public class UnitsController {
         battleTankController.update(dt);
         harvestersController.update(dt);
         buildingController.update(dt);
+        healBotsController.update(dt);
         units.clear();
         aiUnits.clear();
         playerUnits.clear();
         aiBattleTanks.clear();
         playerHarvesterUnits.clear();
+        playerHealTanks.clear();
+        playerBattleTanks.clear();
+        aiHarvesterUnits.clear();
         units.addAll(battleTankController.getActiveList());
         units.addAll(harvestersController.getActiveList());
         units.addAll(buildingController.getActiveList());
+        units.addAll(healBotsController.getActiveList());
         for (int i = 0; i < units.size(); i++) {
             if(units.get(i).getOwnerType() == Owner.AI){
                 aiUnits.add(units.get(i));
                 if(units.get(i).getUnitType() == UnitType.BATTLE_TANK){     //заполняем список боевых танков Аи
                     aiBattleTanks.add((BattleTank)units.get(i));
                 }
+                if(units.get(i).getUnitType() == UnitType.HARVESTER){   // заполняем список харвестеров пользователя
+                    aiHarvesterUnits.add((Harvester) units.get(i));
+                }
             }
             if(units.get(i).getOwnerType() == PLAYER){
                 playerUnits.add(units.get(i));
                 if(units.get(i).getUnitType() == UnitType.HARVESTER){   // заполняем список харвестеров пользователя
                     playerHarvesterUnits.add((Harvester) units.get(i));
+                }
+                if(units.get(i).getUnitType() == UnitType.HEALTANK){   // заполняем список харвестеров пользователя
+                    playerHealTanks.add((HealTank) units.get(i));
+                }
+                if(units.get(i).getUnitType() == UnitType.BATTLE_TANK){   // заполняем список харвестеров пользователя
+                    playerBattleTanks.add((BattleTank) units.get(i));
                 }
             }
         }
@@ -105,8 +129,10 @@ public class UnitsController {
         this.basePlayer = createBuilding(100,100, PLAYER);                   //создание базы игрока
         this.baseAi = createBuilding(27*CELL_SIZE,18*CELL_SIZE, AI);         //создание базы АИ
         createHarvester(basePlayer.getPosition().x+MathUtils.random(150,200), basePlayer.getPosition().y+MathUtils.random(150,200), PLAYER);//создание харвестера для игрока
+        //createHealTank(basePlayer.getPosition().x+MathUtils.random(150,200), basePlayer.getPosition().y+MathUtils.random(150,200), PLAYER);
         //createBattleTank(basePlayer.getPosition().x+MathUtils.random(150,200), basePlayer.getPosition().y+MathUtils.random(150,200), PLAYER);//создание харвестера для игрока
         createHarvester(baseAi.getPosition().x-MathUtils.random(150,200), baseAi.getPosition().y-MathUtils.random(150,200), AI);    //создание харвестера для АИ
+
     }
     public BattleTank createBattleTank (float x, float y, Owner owner){
         return battleTankController.setup(x,y,owner);
@@ -117,10 +143,23 @@ public class UnitsController {
     public Building createBuilding (float x, float y, Owner owner){
         return buildingController.setup(x,y,owner);
     }
+    public HealTank createHealTank (float x, float y, Owner owner){
+        return healBotsController.setup(x,y,owner);
+    }
+
+
     public AbstractUnit getNearestAiUnit(Vector2 point){
         for(AbstractUnit aiUnit: aiUnits){
             if(aiUnit.getPosition().dst(point) <30){
                 return aiUnit;
+            }
+        }
+        return null;
+    }
+    public AbstractUnit getNearestPlUnit(Vector2 point){
+        for(AbstractUnit playerUnit: playerUnits){
+            if(playerUnit.getPosition().dst(point) <30){
+                return playerUnit;
             }
         }
         return null;
@@ -137,6 +176,12 @@ public class UnitsController {
     public List<BattleTank> getAiBattleTanks() {
         return aiBattleTanks;
     }
+    public List<BattleTank> getPlayerBattleTanks() {
+        return playerBattleTanks;
+    }
+    public List<HealTank> getPlayerHealTanks() {
+        return playerHealTanks;
+    }
     public List<AbstractUnit> getUnits() {
         return units;
     }
@@ -145,5 +190,8 @@ public class UnitsController {
     }
     public List<AbstractUnit> getPlayerUnits() {
         return playerUnits;
+    }
+    public List<Harvester> getAiHarvesterUnits() {
+        return aiHarvesterUnits;
     }
 }

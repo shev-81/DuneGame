@@ -1,9 +1,6 @@
 package com.dune.game.core.controllers;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Vector2;
-import com.dune.game.core.Assets;
 import com.dune.game.core.Bullet;
 import com.dune.game.core.GameController;
 import com.dune.game.core.ObjectPool;
@@ -11,13 +8,10 @@ import com.dune.game.core.units.AbstractUnit;
 
 public class ProjectesController extends ObjectPool<Bullet> {
 
-    private TextureRegion [] sphereTexture;
-    private Vector2 tmpV;
+
 
     public ProjectesController(GameController gameController) {
         super(gameController);
-        this.tmpV = new Vector2();
-        this.sphereTexture = new TextureRegion(Assets.getInstance().getAtlas().findRegion("shootBall")).split(16, 16)[0];
     }
 
     public void render (SpriteBatch batch){
@@ -33,9 +27,9 @@ public class ProjectesController extends ObjectPool<Bullet> {
         checkPool();
     }
 
-    public void setup(AbstractUnit unit){
+    public void setup(AbstractUnit unit, int lvlUpgrade){
         Bullet bullet = getActiveElement();
-        bullet.setup(unit, sphereTexture);
+        bullet.setup(unit, lvlUpgrade);
         bullet.setActive(true);
     }
 

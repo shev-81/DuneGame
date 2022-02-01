@@ -8,6 +8,8 @@ import com.dune.game.core.units.*;
 
 import java.util.List;
 
+import static com.dune.game.core.units.UnitType.HEALTANK;
+
 public class Collider {
 
     private GameController gameController;
@@ -24,7 +26,19 @@ public class Collider {
         // проверяем попадания активных снарядов по танкам
         for (Bullet bullet : gameController.getProjectesController().getActiveList()) {
             for (AbstractUnit unit : gameController.getUnitsController().getUnits()) {
-                if(bullet.getOwnerType() != unit.getOwnerType()){
+            if (bullet.getOwnerType() == unit.getOwnerType() && bullet.getOwner() != unit && bullet.getOwner().getUnitType() == HEALTANK) {  // если юнит для снаряда друг
+                    if (bullet.getPosition().dst(unit.getPosition()) < 40 && unit.getHp() < unit.getHpMax()-5) {
+                        for (int k = 0; k < 5; k++) {
+                            tmpV.set(bullet.getVelocity()).nor().scl(120.0f).add(MathUtils.random(-40, 40), MathUtils.random(-40, 40));
+                            gameController.getParticleController().setup(
+                                    bullet.getPosition().x, bullet.getPosition().y, tmpV.x, tmpV.y, 0.3f, 3f, 3f,
+                                    1, 0, 0, 1, 0.3f, 0, 0, 0.4f);
+                        }
+                        unit.healHP(bullet.getDamage());
+                        bullet.setActive(false);
+                    }
+                }
+                if (bullet.getOwnerType() != unit.getOwnerType()) {         // если юнит для снаряда враг
                     if (bullet.getPosition().dst(unit.getPosition()) < 40) {
                         for (int k = 0; k < 25; k++) {
                             tmpV.set(bullet.getVelocity()).nor().scl(120.0f).add(MathUtils.random(-40, 40), MathUtils.random(-40, 40));
@@ -36,11 +50,11 @@ public class Collider {
                         bullet.setActive(false);
                     }
                 }
-                if(unit.getHp()<unit.getHpMax()/2) {  // при хп ниже половины танк загорается
+                if (unit.getHp() < unit.getHpMax() / 2) {  // при хп ниже половины танк загорается
                     for (int i = 0; i < 5; i++) {
                         gameController.getParticleController().setup(
-                            unit.getPosition().x, unit.getPosition().y, MathUtils.random(-40.0f, 40.0f), MathUtils.random(-40.0f, 40.0f), 0.3f, 0.3f, 1.4f,
-                            1, 1, 0, 1f, 0.1f, 0, 0, 0.8f);
+                                unit.getPosition().x, unit.getPosition().y, MathUtils.random(-40.0f, 40.0f), MathUtils.random(-40.0f, 40.0f), 0.3f, 0.3f, 1.4f,
+                                1, 1, 0, 1f, 0.1f, 0, 0, 0.8f);
                     }
                 }
             }
@@ -71,13 +85,23 @@ public class Collider {
                 for (int j = 0; j < gameController.getUnitsController().getUnits().size(); j++) {
                     AbstractUnit u2 = gameController.getUnitsController().getUnits().get(j);
                     if (u1.getPosition().dst(u2.getPosition()) < 60 && u2.getUnitType() == UnitType.HARVESTER && u2.getContainer() != 0) {
-                        if(u2.getOwnerType() == Owner.PLAYER){
+                        if (u2.getOwnerType() == Owner.PLAYER) {
                             gameController.getPlayerLogic().addMoney(u2.getContainer());
-                        }else{
+                        } else {
                             gameController.getAiLogic().addMoney(u2.getContainer());
                         }
                         u2.setContainer(0);
                     }
+                }
+            }
+        }
+        // лечем ближайших юнитов если они имеют половину хп
+        for (int i = 0; i < gameController.getUnitsController().getPlayerHealTanks().size(); i++) {
+            HealTank healTank = gameController.getUnitsController().getPlayerHealTanks().get(i);
+            for (int j = 0; j < gameController.getUnitsController().getPlayerUnits().size(); j++) {
+                AbstractUnit unit = gameController.getUnitsController().getPlayerUnits().get(j);
+                if(!healTank.equals(unit) && healTank.getPosition().dst(unit.getPosition()) < 200 && unit.getHp() < unit.getHpMax()/2){
+                    healTank.setTarget(unit);
                 }
             }
         }

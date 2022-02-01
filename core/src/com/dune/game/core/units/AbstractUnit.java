@@ -1,5 +1,6 @@
 package com.dune.game.core.units;
 
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -15,7 +16,6 @@ public abstract class AbstractUnit extends GameObject implements Poolable, Targe
     protected Owner ownerType;
     protected Weapon weapon;
     protected Targetable target;
-
     protected TextureRegion[] tankTextures;
     protected TextureRegion weaponsTextures;
     protected TextureRegion progressBarTextures;
@@ -24,7 +24,7 @@ public abstract class AbstractUnit extends GameObject implements Poolable, Targe
     protected Vector2 dustV1;
     protected Vector2 dustV2;
     protected int realCellXDestination, realCellYDestination;
-
+    protected int lvlUpgrade;
     protected int container;
     public static final int CONTAINER_POINT = 1;
     public static final int CONTAINER_CAPACITY = 5;
@@ -38,6 +38,7 @@ public abstract class AbstractUnit extends GameObject implements Poolable, Targe
     protected float hp;
     protected float hpMax = 50;
     protected float minDstToActiveTarget;
+    protected Sound useWeaponSound;
 
     public AbstractUnit(GameController gameController) {
         super(gameController);
@@ -48,6 +49,7 @@ public abstract class AbstractUnit extends GameObject implements Poolable, Targe
         this.container = 0;
         this.dustV1 = new Vector2();
         this.dustV2 = new Vector2();
+        this.lvlUpgrade = 1;
     }
 
     public abstract void setup(Owner owner, float x, float y);
@@ -234,6 +236,10 @@ public abstract class AbstractUnit extends GameObject implements Poolable, Targe
         return ownerType;
     }
 
+    public boolean healHP(int heal){
+        hp += heal;
+        return hp <= hpMax;
+    }
     public boolean takeDamage(int damage) {
         if(!isActive()){
             return false;
@@ -245,19 +251,15 @@ public abstract class AbstractUnit extends GameObject implements Poolable, Targe
     public float getHpMax() {
         return hpMax;
     }
-
     public TextureRegion getBorderline() {
         return borderline;
     }
-
     public UnitType getUnitType() {
         return unitType;
     }
-
     public float getHp() {
         return hp;
     }
-
     @Override
     public boolean isActive() {
         if(gameController.isUnitSelected(this) && hp <= 0){
@@ -265,11 +267,9 @@ public abstract class AbstractUnit extends GameObject implements Poolable, Targe
         }
         return hp > 0;
     }
-
     public int getContainer() {
         return container;
     }
-
     public void setContainer(int container) {
         this.container = container;
     }
