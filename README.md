@@ -20,6 +20,32 @@ Dune (стратегия) - десктопное приложение котор
 В игре активно используется паттерн Object Pool, так как объектов взаимодействия очень много (все юниты, здания, снаряды и ракеты, spice, импульсы от Healers).
 Такое использование позволяет сильно снизить потребление памяти и использовать неактивные объекты повторно.
 
+    public abstract class ObjectPool  <T extends Poolable> {
+    protected List<T> activeList;
+    protected List<T> freeList;
+    protected GameController gameController;
+    protected int initialCapacity;
+    
+    protected abstract T newObject();
+
+    public ObjectPool(GameController gameController) {
+        this.initialCapacity = 10;  // начальный размер пула объектов
+        this.gameController = gameController;
+        this.activeList = new ArrayList<>(initialCapacity);
+        this.freeList = new ArrayList<>(initialCapacity);
+    }
+
+    public T getActiveElement() {
+        if(freeList.size()==0){
+            freeList.add(newObject());
+        }
+        T tempObject = freeList.remove(freeList.size()-1);
+        activeList.add(tempObject);
+        return tempObject;
+    }
+    
+Для того что бы создать новый игровой объект необходимо его класс унаследовать от ObjectPool и создать этот объект методом `T getActiveElement()` - полученный объект будет помещен в список пула. При изменении статуса объекта на неактивный он будет перенесен в список неактивных объектов (их можно переиспользовать повторно). 
+
 Большое колличество работы связанно с графическими объектами (OpenGL). Рисунки подготавливались с использованием Aseprite (Программа создания анимированных изображений), 
 а затем упаковывались в карту изображений. Карта использовалась для предоставления регионов изображений для отрисовки объектов в игре. 
 
