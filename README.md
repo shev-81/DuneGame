@@ -1,5 +1,5 @@
 <h1 align="center">Игра Dune.
-<h3 align="center">LibGDX Framework, Java SE + FX.</h3>
+<h3 align="center">LibGDX Framework, Java SE.</h3>
 
  ---------------------
 
